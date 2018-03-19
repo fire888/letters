@@ -56,9 +56,6 @@ s.addGeom = () => {
 	);
 	s.scene.add( m );	
 	
-	
-	/* /examples/#webgl_geometry_text */ 
-	
 	let text = "three.js",
 		height = 20,
 		size = 70,
