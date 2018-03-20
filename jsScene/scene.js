@@ -12,13 +12,11 @@ const s = {};
 s.initScene = () => { 
 	
 	/** SCENE */	
-    s.scene = new THREE.Scene();
+	s.scene = new THREE.Scene();
 	s.camera = new THREE.PerspectiveCamera( 
 		10,	window.innerWidth/window.innerHeight, 3.5, 3000 );
 	s.camera.position.set( 0, 0, 900 );
-	
-	s.clock = new THREE.Clock();
-			
+				
 	/** LIGHTS */
 	let light = new THREE.AmbientLight( 0x112241, 0.2 );
 	light.position.set( 0, 100, 350 );
@@ -42,7 +40,9 @@ s.initScene = () => {
 	s.renderer.setSize( window.innerWidth, window.innerHeight );
 	s.renderer.gammaInput = true;
 	s.renderer.gammaOutput = true;	
-		
+	
+	/** CUSTOM */
+	s.clock = new THREE.Clock();
 	s.addGeom();
 	s.animate();	
 }
@@ -106,3 +106,4 @@ window.addEventListener('resize', s.handleWindowResize, false);
  **************************************************/
  
 s.initScene(); 
+
