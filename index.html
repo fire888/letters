@@ -4,11 +4,16 @@
   <meta charset="UTF-8">
   <style>
 	* { margin: 0px; padding: 0px; }
-	body{ overflow: hidden; }	
+	body{ /*overflow: hidden;*/ }	
   </style> 		
 </head>
 <body>
-<canvas id="canvas-webgl" class="p-canvas-webgl"></canvas>
+<div class="sceneSettings" style="width: 25%; position: absolute; right: 0px; top: 0px; z-index: 200;">
+   <input id ="mainText" type="text" size="40" value="текст для вывески" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 105%; padding-left: 20px;" >
+   <button id = "reDrawButt" style="display: block; position: relative; height: 30px; margin: 0 auto; margin-top: 5%;  width: 75%; ">Обновить</button>
+</div>
+<img id="testImg" src="jsScene/view.png" style = "position: absolute; width: 100%; height: auto; z-index: 100; ">
+<canvas id="canvas-webgl" class="p-canvas-webgl" style = "z-index: -100; width: 70%; height: 70%"></canvas>
 <script src='jsScene/three.js'></script>
 <script src="jsScene/scene.js"></script>
 </body>
