@@ -63,17 +63,17 @@ s.animate = () => {
 			
 	let time = s.clock.getDelta();	
 	
-	let yRotation = (mouseX-window.innerWidth/2)*0.001;
-	let xRotation = (mouseY-window.innerHeight/2)*0.001;
+	let yRotation = (mouseX-window.innerWidth/2)/window.innerWidth * 2.0;
+	let xRotation = (mouseY-window.innerHeight/2)/window.innerHeight * 2.0-1.0;
 	
-	//sc.spotLight.rotation.y = yRotation*50000.0;
 	
 	if (textMesh1){	
-			textMesh1.rotation.y = yRotation;
-			textMesh1.rotation.x = xRotation;			
+			s.camera.position.x = 900 * Math.sin(yRotation);			
+			s.camera.position.z = 900 * Math.cos(yRotation);
+			s.camera.position.y = 900 * Math.cos(xRotation);
+						
+			s.camera.lookAt(scene.position);	
 	}
-	
-	
 	
 	s.renderer.render( scene, s.camera);	
 	requestAnimationFrame( s.animate );	
@@ -121,18 +121,18 @@ document.addEventListener("mousemove", (e) => {
 var textGeo, textMesh1, scene, isTextRotate = false;
  
 /** main params */
-var textValue = "VipJeveleveres",
-		height = 5,
-		size = 20,
-		hover = 0,
-		curveSegments = 4,
-		bevelThickness = 2,
-		bevelSize = 1.5,
-		bevelSegments = 3,
-		bevelEnabled = true,
-		font = undefined,
-		fontName = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
-		fontWeight = "bold"; // normal bold
+var textValue = "Световые буквы",
+	height = 5,
+	size = 20,
+	hover = 0,
+	curveSegments = 4,
+	bevelThickness = 0,
+	bevelSize = 0,
+	bevelSegments = 1,
+	bevelEnabled = true,
+	font = undefined,
+	fontName = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
+	fontWeight = "bold"; // normal bold
 		
 var fontMap = {
 		"helvetiker": 0,
@@ -147,7 +147,7 @@ var weightMap = {
 		"bold": 1
 };	
 	
-var material = new THREE.MeshPhongMaterial( { color: 0xff0000, flatShading: true } );
+var material = new THREE.MeshPhongMaterial( { color: 0x999999, flatShading: true } );
 
 
 
@@ -216,7 +216,7 @@ function createText() {
 			
 function loadFont() {
 	var loader = new THREE.FontLoader();
-		loader.load( 'jsScene/helvetiker_bold.typeface.json', function ( response ) {
+		loader.load( 'jsScene/Roboto_Bold.json', function ( response ) {
 			font = response;
 			
 			createText();		
@@ -231,15 +231,65 @@ function loadFont() {
  * INIT
  **************************************************/
 
-/** BUTTONS ********************************/
  
-let reDrawButt = document.getElementById('reDrawButt');
+/** inputs **********************************/ 
+ 
+/*let reDrawButt = document.getElementById('reDrawButt');
 reDrawButt.onclick = () => {
 	let textInput = document.getElementById('mainText');
 	textValue = textInput.value; 
 	createText();	
+}*/
+
+const inputsHtml = document.getElementsByClassName('inputs');
+let inputsValues = [];
+let inputsValuesOld = [];
+
+const getInputsValues = () => {
+	let arr = [];
+	for( let i=0; i< inputsHtml.length; i++ ){
+		arr.push(inputsHtml[i].value);
+	}
+	return arr;
 }
 
+inputsValuesOld = getInputsValues();
+
+const checkInputsValues = () => {
+
+	inputsValues = getInputsValues();
+	for ( let i =0; i< inputsValues.length; i++ ){
+		if (inputsValuesOld[i] != inputsValues[i]){
+			inputsValuesOld = getInputsValues(); 
+
+			checkChanches( i );
+		}
+	}		
+}
+
+const checkChanches = ( i ) => {
+
+	switch ( inputsHtml[i].id ){
+		case "mainText": 
+			textValue = inputsHtml[i].value;
+			break;
+					
+		case "outLine": 
+			bevelSize = inputsHtml[i].value;
+			break;	
+
+		case "bevel": 
+			bevelThickness = inputsHtml[i].value;
+			break;					
+	}	
+			
+	createText();
+}
+
+setInterval( checkInputsValues, 100 );
+
+ 
+ 
 /** SCENE **********************************/
 
 s.initScene();
