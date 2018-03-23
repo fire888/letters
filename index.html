@@ -19,16 +19,27 @@
 	<span class = "text-interface">текст</span>   
 	<input class = "inputs" id ="mainText" type="text" size="40" value="Световые буквы" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
    
-	<span class = "text-interface">толщина букв</span>
+	<span class = "text-interface">толщина букв (см)</span>
 	<input class= "inputs" id ="outLine" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
     
-	<span class = "text-interface">глубина букв</span>
+	<span class = "text-interface">глубина букв (см)</span>
 	<input class= "inputs" id ="bevel" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
+       
+	<span class = "text-interface">высота букв (см)</span>
+	<input class= "inputs" id ="height" type="text" size="40" value="40" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
    
 </div>
+
+
 <img id="testImg" src="jsScene/view.png" style = "position: absolute; width: 100%; height: auto; z-index: 100; ">
+
+
+
 <canvas id="canvas-webgl" class="p-canvas-webgl" style = "z-index: -100; width: 70%; height: 70%"></canvas>
 <script src='jsScene/three.js'></script>
 <script src="jsScene/scene.js"></script>
+
+
+
 </body>
 </html>

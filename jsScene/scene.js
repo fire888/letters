@@ -121,7 +121,7 @@ document.addEventListener("mousemove", (e) => {
 var textGeo, textMesh1, scene, isTextRotate = false;
  
 /** main params */
-var textValue = "Световые буквы",
+var textValue = "Citygrafika",
 	height = 5,
 	size = 20,
 	hover = 0,
@@ -176,7 +176,7 @@ function createText() {
 	textGeo.computeVertexNormals();
 	// "fix" side normals by removing z-component of normals for side faces
 	// (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
-	if ( ! bevelEnabled ) {
+	/*if ( ! bevelEnabled ) {
 		var triangleAreaHeuristics = 0.1 * ( height * size );
 		for ( var i = 0; i < textGeo.faces.length; i ++ ) {
 			var face = textGeo.faces[ i ];
@@ -196,7 +196,7 @@ function createText() {
 				}
 			}
 		}
-	}
+	}*/
 	var centerOffset = -0.5 * ( textGeo.boundingBox.max.x - textGeo.boundingBox.min.x );
 	textMesh1 = new THREE.Mesh( textGeo, material );
 	textMesh1.position.x = centerOffset;
@@ -233,13 +233,6 @@ function loadFont() {
 
  
 /** inputs **********************************/ 
- 
-/*let reDrawButt = document.getElementById('reDrawButt');
-reDrawButt.onclick = () => {
-	let textInput = document.getElementById('mainText');
-	textValue = textInput.value; 
-	createText();	
-}*/
 
 const inputsHtml = document.getElementsByClassName('inputs');
 let inputsValues = [];
@@ -279,8 +272,12 @@ const checkChanches = ( i ) => {
 			break;	
 
 		case "bevel": 
-			bevelThickness = inputsHtml[i].value;
-			break;					
+			height = inputsHtml[i].value;
+			break;	
+
+		case "height": 
+			size = inputsHtml[i].value;
+			break;				
 	}	
 			
 	createText();
