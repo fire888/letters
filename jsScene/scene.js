@@ -9,19 +9,30 @@
 
  
 const s = {}; 
+const offsetBack = {
+	pX:0,
+	pY:0,
+	scale: 1
+}
  
 s.initScene = () => { 
+
 	
 	/** SCENE */	
 	scene = new THREE.Scene();
 	s.camera = new THREE.PerspectiveCamera( 
-		10,	window.innerWidth/window.innerHeight, 3.5, 3000 );
+		10,	(window.innerWidth * 0.42)/( window.innerHeight * 0.35), 3.5, 15000 );
 	s.camera.position.set( 0, 0, 900 );
-				
+	
+	
 	/** LIGHTS */
 	let light = new THREE.AmbientLight( 0x112241, 0.2 );
 	light.position.set( 0, 100, 350 );
-	scene.add(light);	
+	scene.add(light);
+
+	/** Background Image */ 
+	s.backTexture = false;
+	
 	
 	s.spotLight = new THREE.SpotLight( 0xffffff, 0.8 );
 	s.spotLight.castShadow = true;
@@ -37,14 +48,16 @@ s.initScene = () => {
 	s.canvas = document.getElementById( 'canvas-webgl' );
 	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas} );
 	s.renderer.setClearColor( 0xffffff );	
-	s.renderer.setPixelRatio( window.devicePixelRatio );
-	s.renderer.setSize( window.innerWidth, window.innerHeight );
+	s.renderer.setPixelRatio( window.innerWidth /window.innerHeight);
+	s.renderer.setSize( window.innerWidth * 0.42, window.innerHeight * 0.35 );
 	
-	s.canvas.style.width = "75%";	
-	s.canvas.style.height =  window.innerHeight/window.innerWidth * 75 + "%";
+	s.renderer.domElement.style.width = s.renderer.domElement.width + 'px';
+	s.renderer.domElement.style.height = s.renderer.domElement.height + 'px';
 	
 	s.renderer.gammaInput = true;
 	s.renderer.gammaOutput = true;	
+	
+	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement );	
 	
 	/** CUSTOM */
 	s.clock = new THREE.Clock();
@@ -53,8 +66,7 @@ s.initScene = () => {
 }
 
 
-
-
+let yRotation =0, xRotation=0;  let ax = new THREE.Vector3(0,0,1);
 /**************************************************;
  * ANIMATION SCENE
  **************************************************/
@@ -63,21 +75,46 @@ s.animate = () => {
 			
 	let time = s.clock.getDelta();	
 	
-	let yRotation = (mouseX-window.innerWidth/2)/window.innerWidth * 2.0;
-	let xRotation = (mouseY-window.innerHeight/2)/window.innerHeight * 2.0-1.0;
+	if ( s.backgroundImagePlane ){
+		s.backgroundImagePlane.position.set( s.camera.position.x * (-0.1), s.camera.position.y * (-0.1), s.camera.position.z * (-0.1) );
+		s.backgroundImagePlane.translateX( offsetBack.pX );
+		s.backgroundImagePlane.translateY( offsetBack.pY );		
+		var dist = s.camera.position.distanceTo( scene.position ) * 0.0002;
+		s.backgroundImagePlane.scale.set( dist * offsetBack.scale, dist * offsetBack.scale, dist * offsetBack.scale );		
+		s.backgroundImagePlane.lookAt(s.camera.position);
+		//s.backgroundImagePlane.setRotationFromAxisAngle( new THREE.Vector3(0,0,0) );
+	}	
 	
-	
-	if (textMesh1){	
-			s.camera.position.x = 900 * Math.sin(yRotation);			
-			s.camera.position.z = 900 * Math.cos(yRotation);
-			s.camera.position.y = 900 * Math.cos(xRotation);
-						
-			s.camera.lookAt(scene.position);	
+	if (imgOnLoad){
+		imgOnLoad = false;
+		addImgToScene();
 	}
 	
+	s.controls.update();	
 	s.renderer.render( scene, s.camera);	
 	requestAnimationFrame( s.animate );	
 }
+
+/**************************************************;
+ * ANIMATION SCENE
+ **************************************************/
+
+const addImgToScene = () => {
+	let imageElement = document.getElementById('upload-img');
+	imageElement.onload = function(e) {
+		let texture = new THREE.Texture( this );
+		texture.needsUpdate = true;
+		let w = 2000;
+		console.log(this.height); 
+		let h = this.height/this.width * w;
+		s.planeGeom = new THREE.PlaneGeometry( w, h );
+		s.backMat = new THREE.MeshBasicMaterial( {map: texture});
+		s.backgroundImagePlane = new THREE.Mesh( s.planeGeom, s.backMat );
+		scene.add(s.backgroundImagePlane);	
+		$('#buttonsImg').show();	
+		
+	};	
+};
 
 
 
@@ -86,30 +123,22 @@ s.animate = () => {
 /**************************************************;
  * resize scene
  **************************************************/
-
+/*
 s.handleWindowResize = () => {
-	s.renderer.setSize(window.innerWidth, window.innerHeight);
-	s.camera.aspect = window.innerWidth / window.innerHeight;
+	s.renderer.setPixelRatio( window.innerWidth /window.innerHeight);	
+	s.renderer.setSize( window.innerWidth * 0.42, window.innerWidth  * 0.25 );
+	s.renderer.domElement.style.width = s.renderer.domElement.width + 'px';
+	s.renderer.domElement.style.height = s.renderer.domElement.height + 'px';	
+	s.camera.aspect = (window.innerWidth * 0.42)/( window.innerHeight * 0.35);
 	s.camera.updateProjectionMatrix();
-	s.canvas.style.width = "75%";	
-	s.canvas.style.height =  window.innerHeight/window.innerWidth * 75 + "%";	
 }
 
 window.addEventListener('resize', s.handleWindowResize, false);
 
 
+*/
 
 
-
-/**************************************************;
- * check mouse move 
- **************************************************/
- 	  
-let mouseX = 0, mouseY = 0; 
-document.addEventListener("mousemove", (e) => {	 
-	 mouseX = e.offsetX;
-	 mouseY = e.offsetY;	 
-});
 
 
 
@@ -226,13 +255,12 @@ function loadFont() {
 
 
 
-
 /**************************************************;
  * INIT
  **************************************************/
 
  
-/** inputs **********************************/ 
+/** inputs ****************************************/ 
 
 const inputsHtml = document.getElementsByClassName('inputs');
 let inputsValues = [];
@@ -255,14 +283,15 @@ const checkInputsValues = () => {
 		if (inputsValuesOld[i] != inputsValues[i]){
 			inputsValuesOld = getInputsValues(); 
 
-			checkChanches( i );
+			checkChanges( i );
 		}
 	}		
 }
 
-const checkChanches = ( i ) => {
+const checkChanges = ( i ) => {
 
 	switch ( inputsHtml[i].id ){
+		
 		case "mainText": 
 			textValue = inputsHtml[i].value;
 			break;
@@ -285,11 +314,43 @@ const checkChanches = ( i ) => {
 
 setInterval( checkInputsValues, 100 );
 
+/** buttons img ****************************/
+$('#imgMoveLeft').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.pX -= 3;
+	}
+});	
+$('#imgMoveRight').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.pX += 3;
+	}
+});
+$('#imgMoveTop').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.pY += 3;
+	}
+});	
+$('#imgMoveBottom').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.pY -= 3;
+	}
+});
+$('#imgMore').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.scale += 0.1;
+	}
+});
+$('#imgLess').click( () => {
+	if( s.backgroundImagePlane ){
+		offsetBack.scale -= 0.1;
+	}
+});
  
  
 /** SCENE **********************************/
 
 s.initScene();
+//initMouse();
 loadFont();
 
 

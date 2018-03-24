@@ -14,19 +14,21 @@
   </style> 		
 </head>
 <body>
-<div class="sceneSettings" style="width: 24%; position: absolute; right: 0px; top: 0px; z-index: 200; text-align: center; margin-top: 20%; background-color: #999999; padding-bottom: 1%;">
+<div class="sceneSettings" style="width: 24%; position: absolute; right: 0px; top: 0px; z-index: 200; text-align: center; margin-top: 20%; background-color: #999999; padding-bottom: 1%;" >
 	
 	<span class = "text-interface">текст</span>   
-	<input class = "inputs" id ="mainText" type="text" size="40" value="Световые буквы" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
+	<input class = "inputs" id ="mainText" type="text" size="40" value="Citygrafika" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
    
 	<span class = "text-interface">толщина букв (см)</span>
-	<input class= "inputs" id ="outLine" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
+	<input class= "inputs" id ="outLine" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
     
 	<span class = "text-interface">глубина букв (см)</span>
-	<input class= "inputs" id ="bevel" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
+	<input class= "inputs" id ="bevel" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
        
 	<span class = "text-interface">высота букв (см)</span>
-	<input class= "inputs" id ="height" type="text" size="40" value="40" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" >
+	<input class= "inputs" id ="height" type="text" size="40" value="40" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
+   
+   
    
 </div>
 
@@ -35,8 +37,43 @@
 
 
 
-<canvas id="canvas-webgl" class="p-canvas-webgl" style = "z-index: -100; width: 70%; height: 70%"></canvas>
+<canvas id="canvas-webgl" class="p-canvas-webgl" style = "z-index: 200; position: absolute; top: 60px;"></canvas><br/>
+
+
+<div id = "loaderPic" style="z-index: 300; margin-top: 40%; width: 40%; background-color: #999999; padding: 30px;" >
+	<input type='file' id="upload"/>
+	<div id = "buttonsImg" style="display: none;">
+		<button id = "imgMoveLeft">Фон левее</button>
+		<button id = "imgMoveRight">Фон правее</button>
+		<button id = "imgMoveTop">Фон выше</button>
+		<button id = "imgMoveBottom">Фон ниже</button>	
+		<button id = "imgMore">Фон увеличить</button>	
+		<button id = "imgLess">Фон уменьшить</button>
+	</div>		
+</div>	
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+	
+<img src="#" id="upload-img" alt="image" style = "display: none;"/>
+
+<script language="javascript">
+	var imgOnLoad = false; 
+	function readURL(e) {
+		if (this.files && this.files[0]) {
+			var reader = new FileReader();
+			$(reader).load(function(e) { 
+				$('#upload-img').attr('src', e.target.result); 
+				imgOnLoad = true;
+			});
+			reader.readAsDataURL(this.files[0]);	
+		}
+	}
+	$("#upload").change(readURL);
+</script>
+	
 <script src='jsScene/three.js'></script>
+<script src='jsScene/OrbitControls.js'></script>
 <script src="jsScene/scene.js"></script>
 
 
