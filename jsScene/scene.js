@@ -1,13 +1,14 @@
-
 "use strict";
  
 
+ 
+ 
+ 
  
 /**************************************************;
  * SCENE
  **************************************************/
 
- 
 const s = {}; 
 const offsetBack = {
 	pX:0,
@@ -46,8 +47,8 @@ s.initScene = () => {
 	
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' );
-	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas} );
-	s.renderer.setClearColor( 0xffffff );	
+	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas, alpha: true} );
+	s.renderer.setClearColor( 0xffffff, 0 );	
 	s.renderer.setPixelRatio( window.innerWidth /window.innerHeight);
 	s.renderer.setSize( window.innerWidth * 0.42, window.innerHeight * 0.35 );
 	
@@ -67,6 +68,13 @@ s.initScene = () => {
 
 
 let yRotation =0, xRotation=0;  let ax = new THREE.Vector3(0,0,1);
+
+
+
+
+
+
+
 /**************************************************;
  * ANIMATION SCENE
  **************************************************/
@@ -86,35 +94,14 @@ s.animate = () => {
 	}	
 	
 	if (imgOnLoad){
-		imgOnLoad = false;
-		addImgToScene();
+		imgOnLoad = false
+		$('#buttonsImg').show()
 	}
 	
 	s.controls.update();	
 	s.renderer.render( scene, s.camera);	
 	requestAnimationFrame( s.animate );	
 }
-
-/**************************************************;
- * ANIMATION SCENE
- **************************************************/
-
-const addImgToScene = () => {
-	let imageElement = document.getElementById('upload-img');
-	imageElement.onload = function(e) {
-		let texture = new THREE.Texture( this );
-		texture.needsUpdate = true;
-		let w = 2000;
-		console.log(this.height); 
-		let h = this.height/this.width * w;
-		s.planeGeom = new THREE.PlaneGeometry( w, h );
-		s.backMat = new THREE.MeshBasicMaterial( {map: texture});
-		s.backgroundImagePlane = new THREE.Mesh( s.planeGeom, s.backMat );
-		scene.add(s.backgroundImagePlane);	
-		$('#buttonsImg').show();	
-		
-	};	
-};
 
 
 
@@ -182,6 +169,7 @@ var material = new THREE.MeshPhongMaterial( { color: 0x999999, flatShading: true
 
 	
 	
+	
 /**************************************************;
  * INIT TEXT
  **************************************************/	
@@ -239,19 +227,24 @@ function createText() {
 
 
 
+
+
+
 /**************************************************;
  * LOAD FONTS
  **************************************************/	
 			
-function loadFont() {
-	var loader = new THREE.FontLoader();
-		loader.load( 'jsScene/Roboto_Bold.json', function ( response ) {
-			font = response;
-			
-			createText();		
-			
-		} );
-}; 
+const loadFont = () => {
+	let loader = new THREE.FontLoader();
+	loader.load( 'jsScene/Roboto_Bold.json', ( response ) => {
+		font = response			
+		createText()
+	})
+}
+
+
+
+
 
 
 
@@ -261,6 +254,7 @@ function loadFont() {
 
  
 /** inputs ****************************************/ 
+
 
 const inputsHtml = document.getElementsByClassName('inputs');
 let inputsValues = [];
@@ -293,65 +287,72 @@ const checkChanges = ( i ) => {
 	switch ( inputsHtml[i].id ){
 		
 		case "mainText": 
-			textValue = inputsHtml[i].value;
-			break;
-					
+			textValue = inputsHtml[i].value
+			break	
 		case "outLine": 
-			bevelSize = inputsHtml[i].value;
-			break;	
-
+			bevelSize = inputsHtml[i].value
+			break
 		case "bevel": 
-			height = inputsHtml[i].value;
-			break;	
-
+			height = inputsHtml[i].value
+			break
 		case "height": 
-			size = inputsHtml[i].value;
-			break;				
+			size = inputsHtml[i].value
+			break
 	}	
-			
-	createText();
+		
+	createText()
 }
 
-setInterval( checkInputsValues, 100 );
+setInterval( checkInputsValues, 100 )
+
+
 
 /** buttons img ****************************/
-$('#imgMoveLeft').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.pX -= 3;
-	}
-});	
+
+const backImgHtml = document.getElementById('upload-img')
+const posBackImg = {
+	left: 0,
+	top: 0,
+	width: 100
+}
+
+$('#imgMoveLeft').click( () => { 
+	posBackImg.left -= 10
+	backImgHtml.style.marginLeft = posBackImg.left + "px"
+})
+	
 $('#imgMoveRight').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.pX += 3;
-	}
-});
+	posBackImg.left += 10
+	backImgHtml.style.marginLeft = posBackImg.left + "px"
+})
+
 $('#imgMoveTop').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.pY += 3;
-	}
-});	
+	posBackImg.top -= 10
+	backImgHtml.style.marginTop = posBackImg.top + "px"	
+})
+
+
 $('#imgMoveBottom').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.pY -= 3;
-	}
-});
+	posBackImg.top += 10
+	backImgHtml.style.marginTop = posBackImg.top + "px"	
+})
+
 $('#imgMore').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.scale += 0.1;
-	}
-});
+	posBackImg.width += 10
+	backImgHtml.style.width = posBackImg.width + "%"	
+})
+
 $('#imgLess').click( () => {
-	if( s.backgroundImagePlane ){
-		offsetBack.scale -= 0.1;
-	}
+	posBackImg.width -= 10
+	backImgHtml.style.width = posBackImg.width + "%"
 });
  
  
 /** SCENE **********************************/
 
-s.initScene();
-//initMouse();
-loadFont();
+s.initScene()
+//initMouse()
+loadFont()
 
 
 
