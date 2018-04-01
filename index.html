@@ -21,14 +21,32 @@
   </style> 		
 </head>
 <body>
+
+
+
+
 <div class="sceneSettings" style="width: 24%; position: absolute; right: 0px; top: 0px; z-index: 200; text-align: center; margin-top: 20%; background-color: #999999; padding-bottom: 1%;" >
+	
+	<button class="font" id="font1" value="f1">Без засечек</button>
+	<button class="font"id="font2" value="f2">С засечками</button>
+	<button class="font"id="font3" value="f3">Декоративный</button>
+	
+	<span class = "text-interface" s>тип подсветки</span>
+	<select id = "typeLight" name="select" size="5" multiple style= "width: 75%" >
+		<option selected value="face">Лицевая</option>
+		<option value="facePlus">Лицевая и торец</option>
+		<option value="open">Открытые светодиоды</option>
+		<option value="contr">Контражур</option>
+		<option value="none">Без подсветки</option>		
+   </select>	
 	
 	<span class = "text-interface">текст</span>   
 	<input class = "inputs" id ="mainText" type="text" size="40" value="Citygrafika" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
    
-	<span class = "text-interface">толщина букв (см)</span>
+	<!----<span class = "text-interface">толщина букв (см)</span>
 	<input class= "inputs" id ="outLine" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
-    
+    --->
+	
 	<span class = "text-interface">глубина букв (см)</span>
 	<input class= "inputs" id ="bevel" type="text" size="40" value="0" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
        
@@ -36,9 +54,24 @@
 	<input class= "inputs" id ="height" type="text" size="40" value="40" style="display: block; position: relative; width: 70%; height: 30px; margin: 0 auto; margin-top: 0%; padding-left: 20px;" />
 </div>
 
+
+
+
+
+
+
 <img id="testImg" src="jsScene/view.png" style = "position: absolute; width: 100%; height: auto; z-index: 100; ">
 
+
+
+
+
+
 <canvas id="canvas-webgl" class="p-canvas-webgl" style = "z-index: 200; position: absolute; top: 60px;"></canvas><br/>
+
+
+
+
 
 <div id = "loaderPic" style="z-index: 300; margin-top: 40%; width: 40%; background-color: #999999; padding: 30px;" >
 	<input type='file' id="upload"/>
@@ -52,12 +85,18 @@
 	</div>		
 </div>	
 
+
+
+
+
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 
 <div 
 	id = 'backGround-img-contaner'
 	style = "
 		display: block;
+		background-color: black;
 		position: absolute;
 		z-index: -200;
 		top: 0;
