@@ -26,28 +26,32 @@ s.loadAssets = () => new Promise ( (resolve) => {
 			()=>  resolve()			
 		)
 })
-.then ( () => new Promise ( (resolve )=> {
+.then( () => new Promise ( (resolve )=> {
 			s.mapBump = s.textureLoader.load( 
 				"jsScene/map-noise.png",
 				() => resolve()			
 			)			
 	})
 )
-.then ( () => new Promise ( (resolve )=> {
+.then( () => new Promise ( (resolve )=> {
 			s.mapGlow = s.textureLoader.load( 
 				"jsScene/map-glow.png",
 				() => resolve()			
 			)			
 	})
 )
-.then ( () => new Promise ( (resolve )=> {
+.then( () => new Promise ( (resolve )=> {
 			s.mapLight = s.textureLoader.load( 
 				"jsScene/map-svet.png",
-				() => resolve()			
+				() => {
+					s.mapLight.wrapS = s.mapLight.wrapT = THREE.RepeatWrapping;
+					s.mapLight.repeat.set(0.1, 0.1); 					
+					resolve()
+				}		
 			)			
 	})
 )
-.then ( () => new Promise ( (resolve)=> {
+.then( () => new Promise ( (resolve)=> {
 			s.fontLoader.load( 
 				'jsScene/Roboto_Bold.json', 
 				( response ) => {
@@ -76,13 +80,17 @@ s.loadAssets = () => new Promise ( (resolve) => {
 		}) 
 )
 .then ( ()=> {
-	s.material1 = new THREE.MeshBasicMaterial( { 
+	s.matLightMain = new THREE.MeshBasicMaterial( { 
 		color: 0xff0000,
-		flatShading: true,
-		//side: THREE.DoubleSide 		
+		flatShading: true,		
 	})
+	
+	s.matLightSecond = new THREE.MeshBasicMaterial( {  
+		color: 0xffffff,
+		flatShading: true,	
+	})	
 		
-	s.material2 = new THREE.MeshPhongMaterial( { 
+	s.matIron = new THREE.MeshPhongMaterial( { 
 		color: 0x111b1a,
 		emissive: 0x111b1a,
 		specular: 0x000000,
@@ -91,24 +99,30 @@ s.loadAssets = () => new Promise ( (resolve) => {
 		bumpScale: 0.1,						
 		envMap: s.textureCube,
 		reflectivity: 0.2,
-		//transparent: true,
+		transparent: true,
 		flatShading: true,
-		side: THREE.DoubleSide 	
+		side: THREE.DoubleSide 		
+	})
 		
-	})
-	
-	s.material3 = new THREE.MeshPhongMaterial( { 
-		color: 0x111b1a,
+	s.matSvetodiod = new THREE.MeshBasicMaterial( { 
+		color: 0xffffff,
 		map: s.mapLight, 
-		flatShading: true,
-	})	
-	
-
-	
-	s.matGlow = new THREE.MeshBasicMaterial({ 
+		flatShading: true,	
+	})		
+		
+	s.matGlow = new THREE.MeshBasicMaterial({ 	
 		map: s.mapGlow,
-		transparent: true		
+		flatShading: true,
+		side: THREE.DoubleSide,
+		transparent: true, 
+		depthWrite: false	
 	})
+	
+	s.matEasyColor = new THREE.MeshPhongMaterial({ 	
+		color: 0x554444,
+		transparent: true,
+		flatShading: true		
+	})	
 	
 	s.initScene()	
 	s.createText()
@@ -119,6 +133,8 @@ s.loadAssets = () => new Promise ( (resolve) => {
  
 
 s.loadAssets() 
+ 
+ 
  
  
 /**************************************************;
@@ -146,12 +162,11 @@ s.initScene = () => {
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' );
 	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas, alpha: true} );
-	s.renderer.setClearColor( 0x000000, 0.1 );	
-	s.renderer.setPixelRatio( window.innerWidth /window.innerHeight);
-	s.renderer.setSize( window.innerWidth * 0.42, window.innerHeight * 0.35 );
-	
-	s.renderer.domElement.style.width = s.renderer.domElement.width + 'px';
-	s.renderer.domElement.style.height = s.renderer.domElement.height + 'px';
+	s.renderer.setClearColor( 0x000000, 0.0 );	
+	s.renderer.setPixelRatio( window.innerWidth*0.74/window.innerHeight *0.74);	
+	s.renderer.setSize( Math.floor(window.innerWidth * 0.74 - 10), Math.floor(window.innerHeight  * 0.74 -10) );	
+	s.camera.aspect = (window.innerWidth * 0.74)/( window.innerHeight * 0.74);
+	s.camera.updateProjectionMatrix();
 	
 	s.renderer.gammaInput = true;
 	s.renderer.gammaOutput = true;	
@@ -188,6 +203,9 @@ s.animate = () => {
 		$('#buttonsImg').show()
 	}
 	
+	if (s.matGlow) s.matGlow.needsUpdate = true
+	if (s.mapGlow) s.mapGlow.needsUpdate = true
+	
 	s.controls.update();	
 	s.renderer.render( s.scene, s.camera);	
 	requestAnimationFrame( s.animate );	
@@ -207,10 +225,13 @@ var sceneText,
 isHeightUpdate = false 
  
 /** main params */
-var classLight = "face",
+var typeSignboard = "lettersVolume",
+	classLight = "face",
 
 	textValue = "Citygrafika",
 	height = 5,
+	constHeightCorobLetters = 0,
+	constHeightVolumeLetters = 5,
 	size = 20,
 	hover = 0,
 	curveSegments = 4,
@@ -219,8 +240,8 @@ var classLight = "face",
 	bevelSegments = 1,
 	bevelEnabled = true,
 	font = null,
-	fontName = "optimer", // helvetiker, optimer, gentilis, droid sans, droid serif
-	fontWeight = "bold"; // normal bold
+	fontName = "optimer", 
+	fontWeight = "bold";
 		
 var fontMap = {
 		"helvetiker": 0,
@@ -248,22 +269,46 @@ s.createText = () => {
 		sceneText.remove()
 	}
 	
-	switch (classLight){
-		case "face":
-			sceneText = new Letters()
-			break
-		case "facePlus":
-			sceneText = new LettersPlus()
-			break
-		case "open":
-			sceneText = new LettersOpen()
-			break
-		case "contr":
-			sceneText = new LettersContr()
-			break
-		case "none":
-			sceneText = new LettersNoneLight()
-			break				
+	if (typeSignboard == "lightBox"){
+		
+		switch (classLight){
+			case "face":
+				sceneText = new CorobLetters()
+				break
+			case "facePlus": 
+				sceneText = new CorobLettersPlus()
+				break
+			case "open":
+				sceneText = new CorobLettersOpen()
+				break
+			case "contr":
+				sceneText = new CorobLettersContr()
+				break
+			case "none":
+				sceneText = new CorobLettersNoneLight()
+				break
+		}			
+	}
+	
+	if (typeSignboard == "lettersVolume"){	
+	
+		switch (classLight){
+			case "face":
+				sceneText = new Letters()
+				break
+			case "facePlus":
+				sceneText = new LettersPlus()
+				break
+			case "open":
+				sceneText = new LettersOpen()
+				break
+			case "contr":
+				sceneText = new LettersContr()
+				break
+			case "none":
+				sceneText = new LettersNoneLight()
+				break
+		}		
 	}
 } 
 
@@ -274,14 +319,24 @@ s.createText = () => {
 /**************************************************;
  * CLASSES LETTERS
  **************************************************/
-
-
+ 
+ 
  
 /** MAIN CLASS FRONTLIGHT LETTERS *****************/ 
+
  
 class Letters {
 	
 	constructor () {
+			
+		this.createGeom() 
+		this.addMaterrials()  
+		this.createMesh()
+		this.setGlow()	
+	}
+	
+	createGeom() {
+		
 		this.geom = new THREE.TextGeometry( textValue, {
 			font: font,
 			size: size,
@@ -289,22 +344,20 @@ class Letters {
 			curveSegments: curveSegments,
 			bevelThickness: bevelThickness,
 			bevelSize: bevelSize,
-			bevelEnabled: bevelEnabled
+			bevelEnabled: bevelEnabled,
+			//material: 0, 
+			//extrudeMaterial: 1
 		});
 		this.geom.computeBoundingBox();
 		this.geom.computeVertexNormals();	
-	
-		this.addMaterrials()  
-		this.createMesh()
-		this.setGlow()	
-	}
+	}		
 	
 	addMaterrials() {
-		this.mat = [ s.material1, s.material2 ]
+		this.mat = [ s.matLightMain, s.matIron ]
+		this.matTex = [ s.matSvetodiod, s.matIron]
 	}
 	
 	createMesh() {
-		console.log("lll")
 		this.mesh = new THREE.Mesh( this.geom, this.mat )
 		this.centerOffset = -0.5 * ( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )
 		this.mesh.position.x = this.centerOffset
@@ -318,7 +371,7 @@ class Letters {
 	setGlow() {
 		s.matGlow.opacity = 0.3
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.12, this.geom.boundingBox.max.y*0.13 , 1 )
-		s.glowPlane.position.z = ( () => { if (isHeightUpdate){ return height*10 + 1} else { return height +1 } } )()  
+		s.glowPlane.position.z = height+1//( () => { if (isHeightUpdate){ return height*10 + 1} else { return height +1 } } )()  
 		s.glowPlane.position.y = this.geom.boundingBox.max.y*0.4 	
 	}
 	
@@ -338,7 +391,7 @@ class Letters {
 class LettersPlus extends Letters {
 	
 	addMaterrials() {
-		this.mat = [ s.material1, s.material1 ]
+		this.mat = [ s.matLightMain, s.matLightSecond ]
 	}
 	
 	setGlow() {
@@ -373,6 +426,10 @@ class LettersOpen extends Letters {
 		s.scene.add(this.mesh2)	
 		s.glowPlane.position.z = height+3			
 	}
+	
+	addMaterrials() {
+		this.mat = [ s.matSvetodiod, s.matIron ];
+	}
 
 	remove() {
 		super.remove()
@@ -390,13 +447,13 @@ class LettersOpen extends Letters {
 class LettersContr extends Letters {
 
 	addMaterrials() {
-		this.mat = [ s.material2, s.material2 ]
+		this.mat = [ s.matIron, s.matIron ]
 	}
 
 	setGlow() {
 		super.setGlow()
 		s.glowPlane.position.z = 0
-		s.matGlow.opacity = 1.0	
+		s.matGlow.opacity = 0.8	
 	}
 
 	remove() {
@@ -419,29 +476,192 @@ class LettersNoneLight extends LettersContr {
 
 
 
+/** COROB LETTERS *********************************/  
+ 
+class CorobLetters extends Letters {
+	
+	constructor() {
+		
+		height = constHeightCorobLetters
+		
+		super()
+		
+		this.setCorobMat()
+		this.setCorobMesh()
+
+	}	
+
+	setCorobMat() {
+		
+		this.matCorob = [  s.matIron, s.matIron, s.matIron,  s.matIron,  s.matLightSecond, s.matIron]
+	}	
+	
+	setCorobMesh() {
+	
+		this.meshCorob = new THREE.Mesh(
+			new THREE.BoxGeometry(this.geom.boundingBox.max.x + 10, size*1.7 , constHeightVolumeLetters ),
+			this.matCorob
+		)
+		this.meshCorob.position.z = -constHeightVolumeLetters/2-1
+		this.meshCorob.position.y = size/2-3		
+		s.scene.add(this.meshCorob)	
+	}
+	
+	setGlow() {
+		
+		s.matGlow.opacity = 0.3
+		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.24 , 1 ) 
+		s.glowPlane.position.y = this.geom.boundingBox.max.y/2-3
+		s.glowPlane.position.z = 0.05// -constHeightVolumeLetters
+	}		
+	
+	remove() {
+		
+		s.scene.remove(this.meshCorob)
+		this.meshCorob = null
+		super.remove()
+	}
+}
+
+
+/** COROB LETTERS PLUS ****************************/  
+ 
+class CorobLettersPlus extends CorobLetters {
+	
+	setCorobMesh() {
+		super.setCorobMesh()
+		this.meshCorob2 = new THREE.Mesh(
+			new THREE.BoxGeometry(this.geom.boundingBox.max.x + 10, size*1.7 , constHeightVolumeLetters ),
+			this.matCorob//new THREE.MeshBasicMaterial( {color: 0xffffff })
+		)
+		this.meshCorob.position.z = -constHeightVolumeLetters/2-1
+		this.meshCorob.position.y = size/2-2		
+		s.scene.add(this.meshCorob)	
+	}	
+	
+	setCorobMat() {
+		this.matCorob = [  s.matLightSecond, s.matLightSecond, s.matLightSecond,  s.matLightSecond,  s.matLightSecond, s.matIron]
+	}	
+	
+	setGlow() {
+		super.setGlow()
+		s.glowPlane.position.z = -constHeightVolumeLetters-2
+	}		
+}
+
+
+/** COROB LETTERS OPEN LIGHTS *********************/  
+ 
+class CorobLettersOpen extends CorobLetters {
+	
+	addMaterrials() {
+		this.mat = [ s.matSvetodiod, s.matSvetodiod ]
+	}	
+	
+	setCorobMat() {
+		this.matCorob = [  s.matIron, s.matIron, s.matIron,  s.matIron,  s.matIron, s.matIron]
+	}	
+	
+	setGlow() {
+		super.setGlow()
+		s.glowPlane.position.z = 1
+	}		
+}
+
+
+/** COROB LETTERS CONTRLIGHT *********************/  
+ 
+class CorobLettersContr extends CorobLetters {
+	
+	addMaterrials() {
+		this.mat = [ s.matEasyColor, s.matEasyColor ]
+	}	
+	
+	setCorobMat() {
+		this.matCorob = [  s.matIron, s.matIron, s.matIron,  s.matIron,  s.matIron, s.matIron]
+	}	
+	
+	setGlow() {
+		super.setGlow()
+		s.matGlow.opacity = 0.5
+		s.glowPlane.position.z = -constHeightVolumeLetters-2
+	}		
+}
+
+
+/** COROB LETTERS NONELIGHT *********************/  
+ 
+class CorobLettersNoneLight extends CorobLettersContr {
+			
+	setGlow() {
+		super.setGlow()
+		s.matGlow.opacity = 0.0
+	}		
+}
+
+
+
+
+
+
+
+
+
+/***********************************************;
+ *	Shader Mat SVETODIOD 
+ ***********************************************/
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************************************************;
  * resize scene
  **************************************************/
-/*
+
 s.handleWindowResize = () => {
-	s.renderer.setPixelRatio( window.innerWidth /window.innerHeight);	
-	s.renderer.setSize( window.innerWidth * 0.42, window.innerWidth  * 0.25 );
-	s.renderer.domElement.style.width = s.renderer.domElement.width + 'px';
-	s.renderer.domElement.style.height = s.renderer.domElement.height + 'px';	
-	s.camera.aspect = (window.innerWidth * 0.42)/( window.innerHeight * 0.35);
+	s.renderer.setPixelRatio( window.innerWidth*0.74/window.innerHeight *0.74);	
+	s.renderer.setSize( Math.floor(window.innerWidth * 0.74), Math.floor(window.innerHeight  * 0.74) );	
+	s.camera.aspect = (window.innerWidth * 0.74)/( window.innerHeight * 0.74);
 	s.camera.updateProjectionMatrix();
 }
 
 window.addEventListener('resize', s.handleWindowResize, false);
 
 
-*/
+
 
 
 /**************************************************;
  * INIT INTERFACE BUTTONS
  **************************************************/
 
+ 
+$('#lettersVolume').click( () => { 
+	height = constHeightVolumeLetters	
+	typeSignboard = "lettersVolume"
+	s.createText()
+})
+ 
+ 
+$('#letterCorobs').click( () => { 
+	constHeightVolumeLetters = height
+	typeSignboard = "lightBox"
+	s.createText()
+})
+ 
+ 
+ 
 $('#typeLight').click( (e) => { 
 	if ( classLight != e.target.value ){ 
 		classLight = e.target.value 
@@ -508,10 +728,12 @@ const checkChanges = ( i ) => {
 			break
 		case "bevel":
 			if ( inputsHtml[i].value < 0 ){
-				//$("#bevel").value = 0
-				//inputsHtml[i].value = 0
+				$("#bevel").value = 0
+				inputsHtml[i].value = 0
 			}
+			constHeightVolumeLetters  = inputsHtml[i].value
 			height = inputsHtml[i].value
+			
 			isHeightUpdate = true 
 			break
 		case "height": 
@@ -564,6 +786,11 @@ $('#imgMore').click( () => {
 $('#imgLess').click( () => {
 	posBackImg.width -= 10
 	backImgHtml.style.width = posBackImg.width + "%"
+});
+
+
+$('#imgDell').click( () => {
+	backImgHtml.src = "#"
 });
  
  
