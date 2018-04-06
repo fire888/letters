@@ -1,7 +1,112 @@
 "use strict"
 
+THREE.VolumetericLightShader = {
+  uniforms: {
+    tDiffuse: {value:null},
+    lightPosition: {value: new THREE.Vector2(0.5, 0.5)},
+    exposure: {value: 0.18},
+    decay: {value: 0.95},
+    density: {value: 0.8},
+    weight: {value: 0.4},
+    samples: {value: 20}
+  },
+
+  vertexShader: [
+    "varying vec2 vUv;",
+    "void main() {",
+      "vUv = uv;",
+      "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+    "}"
+  ].join("\n"),
+
+  fragmentShader: [
+    "varying vec2 vUv;",
+    "uniform sampler2D tDiffuse;",
+    "uniform vec2 lightPosition;",
+    "uniform float exposure;",
+    "uniform float decay;",
+    "uniform float density;",
+    "uniform float weight;",
+    "uniform int samples;",
+    "const int MAX_SAMPLES = 100;",
+    "void main()",
+    "{",
+      "vec2 texCoord = vUv;",
+      "vec2 deltaTextCoord = texCoord - lightPosition;",
+      "deltaTextCoord *= 1.0 / float(samples) * density;",
+      "vec4 color = texture2D(tDiffuse, texCoord);",
+      "float illuminationDecay = 1.0;",
+      "for(int i=0; i < MAX_SAMPLES; i++)",
+      "{",
+        "if(i == samples){",
+          "break;",
+        "}",
+        "texCoord -= deltaTextCoord;",
+        "vec4 sample = texture2D(tDiffuse, texCoord);",
+        "sample *= illuminationDecay * weight;",
+        "color += sample;",
+        "illuminationDecay *= decay;",
+      "}",
+      "gl_FragColor = color * exposure;",
+    "}"
+  ].join("\n")
+};
+
+THREE.AdditiveBlendingShader = {
+  uniforms: {
+    tDiffuse: { value:null },
+    tAdd: { value:null }
+  },
+
+  vertexShader: [
+    "varying vec2 vUv;",
+    "void main() {",
+      "vUv = uv;",
+      "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+    "}"
+  ].join("\n"),
+
+  fragmentShader: [
+    "uniform sampler2D tDiffuse;",
+    "uniform sampler2D tAdd;",
+    "varying vec2 vUv;",
+    "void main() {",
+      "vec4 color = texture2D( tDiffuse, vUv );",
+      "vec4 add = texture2D( tAdd, vUv );",
+      "gl_FragColor = color + add;",
+    "}"
+  ].join("\n")
+};
+
+THREE.PassThroughShader = {
+	uniforms: {
+		tDiffuse: { value: null }
+	},
+
+	vertexShader: [
+		"varying vec2 vUv;",
+    "void main() {",
+		  "vUv = uv;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"}"
+	].join( "\n" ),
+
+	fragmentShader: [
+    "uniform sampler2D tDiffuse;",
+    "varying vec2 vUv;",
+    "void main() {",
+			"gl_FragColor = texture2D( tDiffuse, vec2( vUv.x, vUv.y ) );",
+		"}"
+	].join( "\n" )
+};
+
 
 /** name space */
+
+let DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1,
+renderScale   
+
+
 const s = {
 	textureLoader: new THREE.TextureLoader(),
 	fontLoader: new THREE.FontLoader()
@@ -148,8 +253,21 @@ s.initScene = () => {
 	/** SCENE */	
 	s.scene = new THREE.Scene();
 	s.camera = new THREE.PerspectiveCamera( 
-		10,	(window.innerWidth * 0.42)/( window.innerHeight * 0.35), 3.5, 15000 );
+		10,	( window.innerWidth*0.74)/(window.innerHeight *0.74), 3.5, 15000 );
 	s.camera.position.set( 0, 0, 900 );
+	
+	/** RENDERER */
+	s.canvas = document.getElementById( 'canvas-webgl' );
+	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas } );
+	s.renderer.setClearColor( 0x000000 );	
+	s.renderer.setPixelRatio( window.innerWidth*0.74/window.innerHeight *0.74);	
+	s.renderer.setSize( Math.floor(window.innerWidth * 0.74 - 10), Math.floor(window.innerHeight  * 0.74 -10) );	
+	s.camera.aspect = (window.innerWidth * 0.74)/( window.innerHeight * 0.74);
+	s.camera.updateProjectionMatrix();
+	
+	s.renderer.gammaInput = true;
+	s.renderer.gammaOutput = true;			
+	
 	
 	/** LIGHTS */
 	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 );
@@ -159,27 +277,44 @@ s.initScene = () => {
 	s.spotLight.position.set( 0, 1000, 1000 );		
 	s.scene.add(s.spotLight);
 	
-	/** RENDERER */
-	s.canvas = document.getElementById( 'canvas-webgl' );
-	s.renderer = new THREE.WebGLRenderer({ canvas: s.canvas, alpha: true} );
-	s.renderer.setClearColor( 0x000000, 0.0 );	
-	s.renderer.setPixelRatio( window.innerWidth*0.74/window.innerHeight *0.74);	
-	s.renderer.setSize( Math.floor(window.innerWidth * 0.74 - 10), Math.floor(window.innerHeight  * 0.74 -10) );	
-	s.camera.aspect = (window.innerWidth * 0.74)/( window.innerHeight * 0.74);
-	s.camera.updateProjectionMatrix();
-	
-	s.renderer.gammaInput = true;
-	s.renderer.gammaOutput = true;	
-	
-	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement );	
-	
+		
 	/** CUSTOM */
 	s.clock = new THREE.Clock();
+	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement );		
 	
 	/** Glow plane */
 	s.geomGlow = new THREE.PlaneGeometry(10, 10) 
 	s.glowPlane = new THREE.Mesh( s.geomGlow, s.matGlow )
-	s.scene.add( s.glowPlane )
+	//s.scene.add( s.glowPlane )
+	
+	
+	/** TEST */
+    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74*0.1, window.innerHeight *0.74*0.1 );
+    s.occlusionComposer = new THREE.EffectComposer( s.renderer, s.occlusionRenderTarget);
+    s.occlusionComposer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
+    let pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
+    pass.needsSwap = false;
+    s.occlusionComposer.addPass( pass );	
+	
+    s.volumetericLightShaderUniforms = pass.uniforms;	
+	
+	
+    s.composer = new THREE.EffectComposer( s.renderer );
+    s.composer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
+    pass = new THREE.ShaderPass( THREE.AdditiveBlendingShader );
+    pass.uniforms.tAdd.value = s.occlusionRenderTarget.texture;
+    s.composer.addPass( pass );
+    pass.renderToScreen = true;	
+	
+	
+
+    s.material = new THREE.ShaderMaterial( THREE.PassThroughShader );
+    s.material.uniforms.tDiffuse.value = s.occlusionRenderTarget.texture;
+
+    s.mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), s.material );
+    s.composer.passes[1].scene.add( s.mesh );
+    s.mesh.visible = false;
+	
 }
 
 
@@ -195,19 +330,24 @@ s.initScene = () => {
  **************************************************/
   
 s.animate = () => {
+	
+	s.controls.update()
+	
+    s.camera.layers.set(OCCLUSION_LAYER);
+    s.renderer.setClearColor(0x000000);
+    s.occlusionComposer.render();
+    
+    s.camera.layers.set(DEFAULT_LAYER);
+    s.renderer.setClearColor(0x000000);
+    s.composer.render();	
 			
 	let time = s.clock.getDelta();	
-		
-	if (imgOnLoad){
-		imgOnLoad = false
-		$('#buttonsImg').show()
-	}
 	
 	if (s.matGlow) s.matGlow.needsUpdate = true
 	if (s.mapGlow) s.mapGlow.needsUpdate = true
 	
-	s.controls.update();	
-	s.renderer.render( s.scene, s.camera);	
+	
+	//s.renderer.render( s.scene, s.camera);	
 	requestAnimationFrame( s.animate );	
 }
 
@@ -330,8 +470,10 @@ class Letters {
 	constructor () {
 			
 		this.createGeom() 
+		this.createGeomLight() 		
 		this.addMaterrials()  
 		this.createMesh()
+		this.createMeshLight()		
 		this.setGlow()	
 	}
 	
@@ -348,8 +490,25 @@ class Letters {
 			//material: 0, 
 			//extrudeMaterial: 1
 		});
-		this.geom.computeBoundingBox();
-		this.geom.computeVertexNormals();	
+		this.geom.computeBoundingBox()
+		this.geom.computeVertexNormals()	
+	}	
+
+	createGeomLight() {
+
+		this.geomLight = new THREE.TextGeometry( textValue, {
+			font: font,
+			size: size,
+			height: 0.5,
+			curveSegments: curveSegments,
+			bevelThickness: bevelThickness,
+			bevelSize: bevelSize,
+			bevelEnabled: bevelEnabled,
+			//material: 0, 
+			//extrudeMaterial: 1
+		});
+		this.geomLight.computeBoundingBox()
+		this.geomLight.computeVertexNormals()				
 	}		
 	
 	addMaterrials() {
@@ -368,6 +527,16 @@ class Letters {
 		s.scene.add( this.mesh )
 	}
 	
+	createMeshLight() {
+		
+		this.meshLight = this.mesh.clone()
+		this.meshLight.geometry = this.geomLight
+		this.meshLight.material = s.matLightMain		
+		this.meshLight.layers.set( OCCLUSION_LAYER )
+		this.meshLight.position.z = height
+		s.scene.add(this.meshLight)				
+	}
+	
 	setGlow() {
 		s.matGlow.opacity = 0.3
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.12, this.geom.boundingBox.max.y*0.13 , 1 )
@@ -377,6 +546,7 @@ class Letters {
 	
 	remove() {
 		s.scene.remove( this.mesh )
+		s.scene.remove( this.meshLight )		
 		this.mesh = null
 		this.geom = null
 		//this = null	
@@ -389,6 +559,29 @@ class Letters {
 /** FRONT AND SIDE LIGHT **************************/
 
 class LettersPlus extends Letters {
+	
+	createGeomLight() {
+
+		this.geomLight = new THREE.TextGeometry( textValue, {
+			font: font,
+			size: size,
+			height: height,
+			curveSegments: curveSegments,
+			bevelThickness: bevelThickness,
+			bevelSize: bevelSize,
+			bevelEnabled: bevelEnabled,
+			//material: 0, 
+			//extrudeMaterial: 1
+		});
+		this.geomLight.computeBoundingBox()
+		this.geomLight.computeVertexNormals()				
+	}
+
+	createMeshLight() {
+		super.createMeshLight()
+		this.meshLight.position.z = 0				
+	}	
+	
 	
 	addMaterrials() {
 		this.mat = [ s.matLightMain, s.matLightSecond ]
@@ -430,6 +623,11 @@ class LettersOpen extends Letters {
 	addMaterrials() {
 		this.mat = [ s.matSvetodiod, s.matIron ];
 	}
+	
+	createMeshLight(){
+		super.createMeshLight()
+		this.meshLight.material = s.matLightSecond
+	}
 
 	remove() {
 		super.remove()
@@ -449,6 +647,22 @@ class LettersContr extends Letters {
 	addMaterrials() {
 		this.mat = [ s.matIron, s.matIron ]
 	}
+	
+	createMesh(){
+		super.createMesh()
+		this.mesh.material = new THREE.MeshBasicMaterial( { color:0x050505} )
+	}
+	
+	createMeshLight(){
+		super.createMeshLight()
+		this.meshLight.material = s.matLightSecond
+		this.meshLight.position.z = -2
+		
+		this.meshContr = this.mesh.clone()
+		//this.meshContr.material = new THREE.MeshBasicMaterial( { color:0x000000 } )
+		this.meshContr.layers.set( OCCLUSION_LAYER )
+		s.scene.add(this.meshContr)				
+	}
 
 	setGlow() {
 		super.setGlow()
@@ -459,6 +673,8 @@ class LettersContr extends Letters {
 	remove() {
 		super.remove()
 		s.matGlow.opacity = 0.3
+		
+		s.scene.remove(this.meshContr)
 	}	
 	
 }
@@ -467,6 +683,12 @@ class LettersContr extends Letters {
 /** NONELIGHT ************************************/
 
 class LettersNoneLight extends LettersContr {
+		
+	createGeomLight(){
+	}		
+
+	createMeshLight(){
+	}		
 
 	setGlow() {
 		s.matGlow.opacity = 0.0	
@@ -598,31 +820,6 @@ class CorobLettersNoneLight extends CorobLettersContr {
 		s.matGlow.opacity = 0.0
 	}		
 }
-
-
-
-
-
-
-
-
-
-/***********************************************;
- *	Shader Mat SVETODIOD 
- ***********************************************/
- 
- 
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**************************************************;
