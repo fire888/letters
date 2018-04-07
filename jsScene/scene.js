@@ -2,9 +2,10 @@
 
 THREE.VolumetericLightShader = {
   uniforms: {
+	iTime: {value: 0.1 },  
     tDiffuse: {value:null},
     lightPosition: {value: new THREE.Vector2(0.5, 0.5)},
-    exposure: {value: 0.18},
+    exposure: {value: 2.0},
     decay: {value: 0.95},
     density: {value: 0.8},
     weight: {value: 0.4},
@@ -23,31 +24,64 @@ THREE.VolumetericLightShader = {
     "varying vec2 vUv;",
     "uniform sampler2D tDiffuse;",
     "uniform vec2 lightPosition;",
+    "uniform float iTime;",	
     "uniform float exposure;",
     "uniform float decay;",
     "uniform float density;",
     "uniform float weight;",
     "uniform int samples;",
     "const int MAX_SAMPLES = 100;",
+	
+	// Use last part of hash function to generate new random radius and angle...
+	'vec2 Sample(inout vec2 r)',
+	'{',
+		'r = fract(r * vec2(13.3983, 43.4427));',
+		'return r-.5;//-.1;',
+		//"return sqrt(r.x+.001) * vec2(sin(r.y * 6.28318530718), cos(r.y * 6.28318530718))*.5;", // <<=== circular sampling.
+	'}',	
+	
+	
     "void main()",
     "{",
-      "vec2 texCoord = vUv;",
-      "vec2 deltaTextCoord = texCoord - lightPosition;",
-      "deltaTextCoord *= 1.0 / float(samples) * density;",
-      "vec4 color = texture2D(tDiffuse, texCoord);",
-      "float illuminationDecay = 1.0;",
-      "for(int i=0; i < MAX_SAMPLES; i++)",
-      "{",
-        "if(i == samples){",
-          "break;",
-        "}",
-        "texCoord -= deltaTextCoord;",
-        "vec4 sample = texture2D(tDiffuse, texCoord);",
-        "sample *= illuminationDecay * weight;",
-        "color += sample;",
-        "illuminationDecay *= decay;",
-      "}",
-      "gl_FragColor = color * exposure;",
+      "vec2 uv = vUv;",
+      //"vec2 deltaTextCoord = texCoord - lightPosition;",
+      //"deltaTextCoord *= 1.0 / float(samples) * density;",
+      //"vec4 color = texture2D(tDiffuse, texCoord);",
+      //"float illuminationDecay = 1.0;",
+      
+	  
+	  //"for(int i=0; i < MAX_SAMPLES; i++)",
+      //"{",
+       // "if(i == samples){",
+       //   "break;",
+       // "}",
+       // "texCoord -= deltaTextCoord;",
+       // "vec4 sample = texture2D(tDiffuse, texCoord);",
+       // "sample *= illuminationDecay * weight;",
+       // "color += sample;",
+       // "illuminationDecay *= decay;",
+      //"}",
+		//'vec2 random = uv+iTime+0.01;',
+		//'float str = 0.08;', 
+		
+		// Do the blur here...
+		//'vec4 acc = vec4(0.0);',
+		//'for (int i = 0; i < 30; i++)',
+		//'{',
+		//	'acc += texture2D(tDiffuse, uv + vec2(str) * Sample(random));',
+		//'}',
+		//'acc = acc / 30.0 ;',
+		
+			'vec4 sum = vec4(0);',
+			'for( int i=-4; i < 4; i++) {',
+				'for( int j=-4; j < 4; j++) {',
+					//'float coorX = j-0.01;', 
+					'sum += texture2D( tDiffuse, (uv+vec2(j, i)*0.005) )*0.015625;',
+				'}',
+			'}',			
+		
+	    
+      "gl_FragColor = sum * exposure;",
     "}"
   ].join("\n")
 };
@@ -85,16 +119,16 @@ THREE.PassThroughShader = {
 
 	vertexShader: [
 		"varying vec2 vUv;",
-    "void main() {",
+		"void main() {",
 		  "vUv = uv;",
 			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 		"}"
 	].join( "\n" ),
 
 	fragmentShader: [
-    "uniform sampler2D tDiffuse;",
-    "varying vec2 vUv;",
-    "void main() {",
+		"uniform sampler2D tDiffuse;",
+		"varying vec2 vUv;",
+		"void main() {",
 			"gl_FragColor = texture2D( tDiffuse, vec2( vUv.x, vUv.y ) );",
 		"}"
 	].join( "\n" )
@@ -289,7 +323,7 @@ s.initScene = () => {
 	
 	
 	/** TEST */
-    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74*0.1, window.innerHeight *0.74*0.1 );
+    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74*0.7, window.innerHeight *0.74*0.7);
     s.occlusionComposer = new THREE.EffectComposer( s.renderer, s.occlusionRenderTarget);
     s.occlusionComposer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
     let pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
@@ -311,7 +345,7 @@ s.initScene = () => {
     s.material = new THREE.ShaderMaterial( THREE.PassThroughShader );
     s.material.uniforms.tDiffuse.value = s.occlusionRenderTarget.texture;
 
-    s.mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), s.material );
+    s.mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 10, 10 ), s.material );
     s.composer.passes[1].scene.add( s.mesh );
     s.mesh.visible = false;
 	
@@ -499,7 +533,7 @@ class Letters {
 		this.geomLight = new THREE.TextGeometry( textValue, {
 			font: font,
 			size: size,
-			height: 0.5,
+			height: 3.5,
 			curveSegments: curveSegments,
 			bevelThickness: bevelThickness,
 			bevelSize: bevelSize,
