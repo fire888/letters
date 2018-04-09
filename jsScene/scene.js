@@ -135,6 +135,52 @@ THREE.PassThroughShader = {
 };
 
 
+const ShadowShader = {
+	uniforms: {
+
+	},
+
+	vertexShader: [
+		"varying vec2 vUv;",
+		"void main() {",
+		  "vUv = uv;",
+			"vec3 newPosition = position + normal* vec3( -1.5, -1.5, 1.0 );",	
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+		"}"
+	].join( "\n" ),
+
+	fragmentShader: [
+		"varying vec2 vUv;",
+		"void main() {",
+			"gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 ) ;",
+		"}"
+	].join( "\n" )
+};
+
+const LightShader = {
+	uniforms: {
+		iTime: { value: null }		
+	},
+
+	vertexShader: [
+		"uniform float iTime;",
+		"varying vec2 vUv;",
+		"void main() {",
+		  "vUv = uv;",
+			"vec3 newPosition = position + normal* vec3( 1.2 * sin( iTime * (-.8) ), 1.0 * sin( iTime * 0.2 ), sin( iTime * 0.2 ));",	
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+		"}"
+	].join( "\n" ),
+
+	fragmentShader: [
+		"varying vec2 vUv;",
+		"void main() {",
+			"gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 ) ;",
+		"}"
+	].join( "\n" )
+};
+
+
 /** name space */
 
 let DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1,
@@ -304,17 +350,17 @@ s.initScene = () => {
 	
 	
 	/** LIGHTS */
-	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 );
+	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 )
 	s.scene.add(lightAmb);
 	
-	s.spotLight = new THREE.SpotLight( 0xf1eeca, 0.5 );
+	s.spotLight = new THREE.SpotLight( 0xf1eeca, 0.5 )
 	s.spotLight.position.set( 0, 1000, 1000 );		
 	s.scene.add(s.spotLight);
 	
 		
 	/** CUSTOM */
 	s.clock = new THREE.Clock();
-	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement );		
+	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement )
 	
 	/** Glow plane */
 	s.geomGlow = new THREE.PlaneGeometry(10, 10) 
@@ -323,7 +369,7 @@ s.initScene = () => {
 	
 	
 	/** TEST */
-    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74*0.7, window.innerHeight *0.74*0.7);
+    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74, window.innerHeight *0.74 )
     s.occlusionComposer = new THREE.EffectComposer( s.renderer, s.occlusionRenderTarget);
     s.occlusionComposer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
     let pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
@@ -349,6 +395,10 @@ s.initScene = () => {
     s.composer.passes[1].scene.add( s.mesh );
     s.mesh.visible = false;
 	
+	
+	s.matShaderLight = new THREE.ShaderMaterial( LightShader )	
+	s.clock = new THREE.Clock();
+	
 }
 
 
@@ -365,6 +415,9 @@ s.initScene = () => {
   
 s.animate = () => {
 	
+	let time = s.clock.getDelta();	
+	s.matShaderLight.uniforms.iTime.value += time * 4.0 ;	
+	
 	s.controls.update()
 	
     s.camera.layers.set(OCCLUSION_LAYER);
@@ -375,7 +428,6 @@ s.animate = () => {
     s.renderer.setClearColor(0x000000);
     s.composer.render();	
 			
-	let time = s.clock.getDelta();	
 	
 	if (s.matGlow) s.matGlow.needsUpdate = true
 	if (s.mapGlow) s.mapGlow.needsUpdate = true
@@ -533,7 +585,7 @@ class Letters {
 		this.geomLight = new THREE.TextGeometry( textValue, {
 			font: font,
 			size: size,
-			height: 3.5,
+			height: 0.5,
 			curveSegments: curveSegments,
 			bevelThickness: bevelThickness,
 			bevelSize: bevelSize,
@@ -564,18 +616,24 @@ class Letters {
 	createMeshLight() {
 		
 		this.meshLight = this.mesh.clone()
+		//this.meshLight.scale.set( 1.1, 1.1, 1.1 )
 		this.meshLight.geometry = this.geomLight
-		this.meshLight.material = s.matLightMain		
+		this.meshLight.material = s.matShaderLight	
 		this.meshLight.layers.set( OCCLUSION_LAYER )
 		this.meshLight.position.z = height
-		s.scene.add(this.meshLight)				
+		s.scene.add(this.meshLight)
+		
+		let shadow = this.meshLight.clone()
+		shadow.material = new THREE.ShaderMaterial( ShadowShader )
+		shadow.position.set( 0, 0, 1 )
+		this.meshLight.add( shadow )	
 	}
 	
 	setGlow() {
 		s.matGlow.opacity = 0.3
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.12, this.geom.boundingBox.max.y*0.13 , 1 )
 		s.glowPlane.position.z = height+1//( () => { if (isHeightUpdate){ return height*10 + 1} else { return height +1 } } )()  
-		s.glowPlane.position.y = this.geom.boundingBox.max.y*0.4 	
+		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 	
 	}
 	
 	remove() {
