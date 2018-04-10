@@ -297,8 +297,10 @@ s.loadAssets = () => new Promise ( (resolve) => {
 		
 	s.matGlow = new THREE.MeshBasicMaterial({ 	
 		map: s.mapGlow,
+		color: 0xff0000,
 		flatShading: true,
 		side: THREE.DoubleSide,
+		opacity: 0.3,
 		transparent: true, 
 		depthWrite: false	
 	})
@@ -325,7 +327,15 @@ s.loadAssets()
 /**************************************************;
  * SCENE
  **************************************************/
- 
+
+var params = {
+	projection: 'normal',
+	background: false,
+	exposure: 0.9,
+	bloomStrength: 1.2,
+	bloomThreshold: 0.21,
+	bloomRadius: 0.55
+}; 
  
 s.initScene = () => { 
 
@@ -365,47 +375,55 @@ s.initScene = () => {
 	/** Glow plane */
 	s.geomGlow = new THREE.PlaneGeometry(10, 10) 
 	s.glowPlane = new THREE.Mesh( s.geomGlow, s.matGlow )
-	//s.scene.add( s.glowPlane )
+	s.scene.add( s.glowPlane )
 	
-	
-	/** TEST */
-    s.occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth*0.74, window.innerHeight *0.74 )
-    s.occlusionComposer = new THREE.EffectComposer( s.renderer, s.occlusionRenderTarget);
-    s.occlusionComposer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
-    let pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
-    pass.needsSwap = false;
-    s.occlusionComposer.addPass( pass );	
-	
-    s.volumetericLightShaderUniforms = pass.uniforms;	
-	
-	
-    s.composer = new THREE.EffectComposer( s.renderer );
-    s.composer.addPass( new THREE.RenderPass( s.scene, s.camera ) );
-    pass = new THREE.ShaderPass( THREE.AdditiveBlendingShader );
-    pass.uniforms.tAdd.value = s.occlusionRenderTarget.texture;
-    s.composer.addPass( pass );
-    pass.renderToScreen = true;	
-	
-	
-
-    s.material = new THREE.ShaderMaterial( THREE.PassThroughShader );
-    s.material.uniforms.tDiffuse.value = s.occlusionRenderTarget.texture;
-
-    s.mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 10, 10 ), s.material );
-    s.composer.passes[1].scene.add( s.mesh );
-    s.mesh.visible = false;
-	
-	
+	/** mat light */
 	s.matShaderLight = new THREE.ShaderMaterial( LightShader )	
-	s.clock = new THREE.Clock();
+	s.clock = new THREE.Clock();	
 	
+	/** COMPOSER */
+	s.renderScene = new THREE.RenderPass( s.scene, s.camera );
+	
+	s.effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+	s.effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+	
+	s.bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 ); //1.0, 9, 0.5, 512);
+	s.bloomPass.threshold = params.bloomThreshold
+	s.bloomPass.strength = params.bloomStrength
+	s.bloomPass.radius = params.bloomRadius
+	
+	s.bloomPass.renderToScreen = true;
+	
+	s.composer = new THREE.EffectComposer( s.renderer );
+	s.composer.setSize( window.innerWidth, window.innerHeight );
+	s.composer.addPass( s.renderScene );
+	s.composer.addPass( s.effectFXAA );
+	s.composer.addPass( s.bloomPass );
+	
+	s.renderer.gammaInput = true;
+	s.renderer.gammaOutput = true;
+	s.renderer.toneMappingExposure = Math.pow( params.exposure, 4.0 )
+	
+
+	
+	/** GUI */
+	var gui = new dat.GUI({ autoPlace: false });
+
+	let customContainer = document.getElementById( 'wrapper3d' );
+	customContainer.appendChild( gui.domElement );
+	
+	gui.add( params, 'exposure', 0.1, 2 );
+	gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+		s.bloomPass.threshold = Number( value );
+	} );
+	gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
+		s.bloomPass.strength = Number( value );
+	} );
+	gui.add( params, 'bloomRadius', 0.0, 1.0 ).onChange( function ( value ) {
+		s.bloomPass.radius = Number( value );
+	} );
+	gui.open();		
 }
-
-
-
-
-
-
 
 
 
@@ -416,23 +434,15 @@ s.initScene = () => {
 s.animate = () => {
 	
 	let time = s.clock.getDelta();	
-	s.matShaderLight.uniforms.iTime.value += time * 4.0 ;	
+	//s.matShaderLight.uniforms.iTime.value += time * 4.0 ;	
 	
-	s.controls.update()
-	
-    s.camera.layers.set(OCCLUSION_LAYER);
-    s.renderer.setClearColor(0x000000);
-    s.occlusionComposer.render();
-    
-    s.camera.layers.set(DEFAULT_LAYER);
-    s.renderer.setClearColor(0x000000);
-    s.composer.render();	
-			
+	s.controls.update()		
 	
 	if (s.matGlow) s.matGlow.needsUpdate = true
 	if (s.mapGlow) s.mapGlow.needsUpdate = true
-	
-	
+
+	s.renderer.toneMappingExposure = Math.pow( params.exposure, 4.0 );	
+	s.composer.render();
 	//s.renderer.render( s.scene, s.camera);	
 	requestAnimationFrame( s.animate );	
 }
@@ -630,7 +640,7 @@ class Letters {
 	}
 	
 	setGlow() {
-		s.matGlow.opacity = 0.3
+		s.matGlow.opacity = 0.1
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.12, this.geom.boundingBox.max.y*0.13 , 1 )
 		s.glowPlane.position.z = height+1//( () => { if (isHeightUpdate){ return height*10 + 1} else { return height +1 } } )()  
 		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 	
@@ -720,6 +730,12 @@ class LettersOpen extends Letters {
 		super.createMeshLight()
 		this.meshLight.material = s.matLightSecond
 	}
+	
+	setGlow() {
+		super.setGlow()
+		//s.glowPlane.position.z = 0
+		s.matGlow.opacity = 0.2	
+	}	
 
 	remove() {
 		super.remove()
@@ -742,31 +758,31 @@ class LettersContr extends Letters {
 	
 	createMesh(){
 		super.createMesh()
-		this.mesh.material = new THREE.MeshBasicMaterial( { color:0x050505} )
+		this.mesh.material = new THREE.MeshBasicMaterial({ color:0x000000})
 	}
 	
 	createMeshLight(){
 		super.createMeshLight()
-		this.meshLight.material = s.matLightSecond
+		this.meshLight.material = s.matLightMain
 		this.meshLight.position.z = -2
 		
 		this.meshContr = this.mesh.clone()
-		//this.meshContr.material = new THREE.MeshBasicMaterial( { color:0x000000 } )
-		this.meshContr.layers.set( OCCLUSION_LAYER )
-		s.scene.add(this.meshContr)				
+		this.meshContr.material = new THREE.MeshBasicMaterial({ color:0xff0000 })
+		s.scene.add( this.meshContr )	
+		this.meshContr.position.z = -5		
 	}
 
 	setGlow() {
 		super.setGlow()
 		s.glowPlane.position.z = 0
-		s.matGlow.opacity = 0.8	
+		s.matGlow.opacity = 0.4	
 	}
 
 	remove() {
 		super.remove()
 		s.matGlow.opacity = 0.3
 		
-		s.scene.remove(this.meshContr)
+		s.scene.remove( this.meshContr )
 	}	
 	
 }
@@ -775,7 +791,12 @@ class LettersContr extends Letters {
 /** NONELIGHT ************************************/
 
 class LettersNoneLight extends LettersContr {
-		
+	
+	createMesh(){
+		super.createMesh()
+		this.mesh.material = new THREE.MeshBasicMaterial({ color:0x111111 })
+	}
+	
 	createGeomLight(){
 	}		
 
