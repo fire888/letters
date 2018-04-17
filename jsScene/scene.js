@@ -5,7 +5,12 @@
  * VARS SPACES
  **************************************************/
 
- const s = {
+const appl = {
+	
+	resizeColorPicker: null
+}  
+ 
+const s = {
 	
 	textureLoader: new THREE.TextureLoader(),
 	fontLoader: new THREE.FontLoader()
@@ -18,10 +23,13 @@
  **************************************************/
  
 const loadAssets = () => new Promise ( ( resolve )=> {
-			s.mapGlow = s.textureLoader.load( 
-				"jsScene/map-glow.png",
-				() => resolve()			
-			)			
+			
+		appl.resizeColorPicker()
+		
+		s.mapGlow = s.textureLoader.load( 
+			"jsScene/map-glow.png",
+			() => resolve()			
+		)			
 } )
 .then( () => new Promise ( ( resolve )=> {
 			s.mapLight = s.textureLoader.load( 
@@ -65,7 +73,7 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 .then ( () => {
 	
 	s.matLightMain = new THREE.MeshBasicMaterial( { 
-		color: 0xff0000,
+		color: 0x3f2fff,
 		flatShading: true,		
 	})
 	
@@ -76,7 +84,7 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 		
 	s.matIron = new THREE.MeshPhongMaterial( { 
 		color: 0x111b1a,
-		emissive: 0x111b1a,
+		emissive: 0x070707,
 		specular: 0x000000,
 		shininess: 0.1,				
 		reflectivity: 0.2,
@@ -93,7 +101,7 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 		
 	s.matGlow = new THREE.MeshBasicMaterial( { 	
 		map: s.mapGlow,
-		color: 0xff0000,
+		color: 0x00ffbd,
 		flatShading: true,
 		side: THREE.DoubleSide,
 		opacity: 0.3,
@@ -102,19 +110,19 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 	} )
 	
 	s.matEasyColor = new THREE.MeshPhongMaterial( { 	
-		color: 0x554444,
+		color: 0x005500,
 		transparent: true,
 		flatShading: true		
 	} )	
 	
 	s.initScene()	
 	s.createText()
+	calckPrice()	
 	s.animate()	
 	
 } )
  
-loadAssets() 
- 
+window.onload = () => loadAssets() 
  
  
 /**************************************************;
@@ -127,21 +135,21 @@ s.initScene = () => {
 	s.scene = new THREE.Scene();
 	s.camera = new THREE.PerspectiveCamera( 
 		10,	( window.innerWidth * 0.74 ) / ( window.innerHeight * 0.74 ), 3.5, 15000 );
-	s.camera.position.set( 0, 0, 1300 )
+	s.camera.position.set( -400, 400, 1700 )
 	
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' )
 	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas } )
-	s.renderer.setClearColor( 0x000000 );	
-	s.renderer.setPixelRatio( window.innerWidth *0.74 / window.innerHeight * 0.74 );	
-	s.renderer.setSize( Math.floor(window.innerWidth * 0.74 - 10 ), Math.floor( window.innerHeight  * 0.74 -10 ) );	
-	s.camera.aspect = ( window.innerWidth * 0.74 ) / ( window.innerHeight * 0.74 );
-	s.camera.updateProjectionMatrix();
+	s.renderer.setClearColor( 0x000000 )
+	s.handleWindowResize()	
 	
 	s.renderer.gammaInput = true;
 	s.renderer.gammaOutput = true;			
 		
 	/** LIGHTS */
+	let pointL = new THREE.PointLight( 0xffffff, 1.0 )
+	pointL.position.set( 200, 300, 600 )
+	s.scene.add( pointL );
 	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 )
 	s.scene.add(lightAmb);
 	
@@ -159,16 +167,15 @@ s.initScene = () => {
 	s.scene.add( s.glowPlane )
 	
 	/** mat light */
-	s.matShaderLight = new THREE.ShaderMaterial( LightShader )	
-	s.clock = new THREE.Clock();	
+	s.matShaderLight = new THREE.ShaderMaterial( LightShader )		
 	
 	/** COMPOSER */
-	s.renderScene = new THREE.RenderPass( s.scene, s.camera );
+	s.renderScene = new THREE.RenderPass( s.scene, s.camera )
 	
 	s.effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-	s.effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+	s.effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight )
 	
-	s.bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 ); //1.0, 9, 0.5, 512);
+	s.bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 )
 	s.bloomPass.threshold = 0.21
 	s.bloomPass.strength = 1.2
 	s.bloomPass.radius = 0.55
@@ -198,12 +205,8 @@ s.animate = () => {
 	
 	s.controls.update()		
 	
-	//if ( s.matGlow ) s.matGlow.needsUpdate = true
-	//if ( s.mapGlow ) s.mapGlow.needsUpdate = true
-
-	s.renderer.toneMappingExposure = Math.pow( 0.9, 4.0 );	
-	s.composer.render();
-	//s.renderer.render( s.scene, s.camera);
+	s.renderer.toneMappingExposure = Math.pow( 0.9, 4.0 )	
+	s.composer.render()
 	
 	requestAnimationFrame( s.animate );	
 }
@@ -218,16 +221,16 @@ let sceneText
 
 const dataT = {
 	
-	classLight: 'face',
-	typeBoard: 'lettersVolume',
+	typeLight: 'front',
+	typeBoard: 'letters',
 	textValue: 'Citygrafika',
-	height: 20,
+	height: 10,
 	oldHeightLetters: 5,
 	oldHeightCorob: 1,
 	isHeightUpdate: false, 	
 	size: 50,
 	hover: 0,
-	curveSegments: 4,
+	curveSegments: 3,
 	bevelThickness: 0,
 	bevelSize: 0,
 	bevelSegments: 1,
@@ -264,12 +267,10 @@ class Letters {
 		this.createGeom() 		
 		this.createMaterrials()  
 		this.createMesh()		
-		this.setGlow()	
+		this.setGlow()
 	}
 	
 	createGeom() {
-		
-		console.log( `Create: ${ dataT.height }`)
 		
 		this.geom = new THREE.TextGeometry( dataT.textValue, {
 			font: dataT.font,
@@ -287,14 +288,12 @@ class Letters {
 	createMaterrials() {
 		
 		this.mat = [ s.matLightMain, s.matIron ]
-		this.matTex = [ s.matSvetodiod, s.matIron]
 	}
 	
 	createMesh() {
 		
 		this.mesh = new THREE.Mesh( this.geom, this.mat )
 		this.centerOffset = -0.5 * ( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )
-		//console.log( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )
 		htmlAddBoardWidth( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )	
 		this.mesh.position.x = this.centerOffset
 		this.mesh.position.y = dataT.hover
@@ -306,10 +305,11 @@ class Letters {
 	
 	setGlow() {
 		
-		s.matGlow.opacity = 0.1
+		s.glowPlane.visible = false
+		/*s.matGlow.opacity = 0.1
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.12, this.geom.boundingBox.max.y*0.13 , 1 )
-		s.glowPlane.position.z = dataT.height+1  
-		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 	
+		s.glowPlane.position.z = dataT.height+2  
+		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4*/ 	
 	}
 	
 	remove() {
@@ -604,6 +604,11 @@ s.handleWindowResize = () => {
 	s.renderer.setSize( Math.floor(window.innerWidth * 0.74), Math.floor(window.innerHeight  * 0.74) );	
 	s.camera.aspect = ( window.innerWidth * 0.74 ) / ( window.innerHeight * 0.74 );
 	s.camera.updateProjectionMatrix();
+	$('#app').height( window.innerHeight * 0.75 )
+	$('#sceneSettings').width( window.innerWidth * 0.26 )
+
+	if ( l ) l.style.marginLeft = window.innerWidth * 0.3 + 'px'	
+	appl.resizeColorPicker()	
 }
 
 window.addEventListener( 'resize', s.handleWindowResize, false );
@@ -616,15 +621,17 @@ window.addEventListener( 'resize', s.handleWindowResize, false );
  
 s.createText = () => {
 	
+	if ( l ) l.style.display = 'block'
+	
 	if ( sceneText ) sceneText.remove()
 	
-	if ( dataT.typeBoard == "lightBox" ) {
+	if ( dataT.typeBoard == "box" ) {
 	
-		switch ( dataT.classLight ) {
-			case "face":
+		switch ( dataT.typeLight ) {
+			case "front":
 				sceneText = new CorobLetters()
 				break
-			case "facePlus": 
+			case "frontPlus": 
 				sceneText = new CorobLettersPlus()
 				break
 			case "open":
@@ -639,13 +646,13 @@ s.createText = () => {
 		}			
 	}
 	
-	if ( dataT.typeBoard == "lettersVolume" ) {	
+	if ( dataT.typeBoard == "letters" ) {	
 		
-		switch ( dataT.classLight ) {
-			case "face":
+		switch ( dataT.typeLight ) {
+			case "front":
 				sceneText = new Letters()
 				break
-			case "facePlus":
+			case "frontPlus":
 				sceneText = new LettersPlus()
 				break
 			case "open":
@@ -659,6 +666,8 @@ s.createText = () => {
 				break
 		}		
 	}
+	
+	if ( l ) l.style.display = 'none'
 } 
 
 
@@ -675,14 +684,6 @@ $('.typeBoard').click( ( e ) => {
 	$(e.target).addClass('checkOn')
 	
 	dataT.typeBoard = e.target.value
-	
-	if ( typeSignboard == 'lettersVolume') {
-		//dataT.height = dataT.oldHeightCorob
-	}
-	
-	if ( typeSignboard == 'letterCorobs') {
-		dataT.oldHeightCorob = height
-	}	
 	
 	s.createText()	
 } ) 
@@ -710,12 +711,12 @@ $('.font').click( ( e ) => {
 
 $('.typeLight').click( ( e ) => { 
 
-	if ( dataT.classLight == e.target.value ) return
+	if ( dataT.typeLight == e.target.value ) return
 		
 	$('.typeLight').removeClass('checkOn')
 	$(e.target).addClass('checkOn')	
 	
-	dataT.classLight = e.target.value 
+	dataT.typeLight = e.target.value 
 	s.createText()			
 } )
 
@@ -757,79 +758,104 @@ const checkChanges = ( i ) => {
 		case "mainText": 
 			dataT.textValue = inputsHtml[i].value
 			break
-		case "bevel":
+		case "height":
 			if ( inputsHtml[i].value < 1 ) inputsHtml[i].value = 1
 			dataT.height = inputsHtml[i].value; 
 			break
-		case "height": 
+		case "size": 
 			dataT.size = inputsHtml[i].value
 			break
 	}	
 		
 	s.createText()
+	calckPrice()
 }
 
 setInterval( checkInputsValues, 100 )
 
 
+/** COLOR PICKER **********************************/
+
+const colorCanvas = document.getElementById('colorPikerBar')
+appl.colorPick = document.getElementById('colorPicker') 
+const context = colorCanvas.getContext('2d')
+
+let mouseDown = false
+window.onmousedown = e => mouseDown = true
+window.onmouseup = e => mouseDown = false
+
+const rgbToHex = (r, g, b) => {
+	
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+
+appl.resizeColorPicker = function() {
+	
+	if ( ! colorCanvas ) return 
+	if ( ! colorCanvas.getContext ) return
+	
+	let w = Math.floor( window.innerWidth * 0.20 ) 
+	let h = 25 
+
+	colorCanvas.width = w
+	colorCanvas.height = h 
+	
+	let grad = context.createLinearGradient( 0, 0, w, 0);	 
+	let cols = [ [255,0,0], [255,255,0], [0,255,0], [0,255,255], [50,50,255], [255,0,255] ];
+	
+	for ( var i = 0; i <= 5; i ++ ) {
+			let color = 'rgb(' +  cols[i][0] + ',' + cols[i][1] + ',' + cols[i][2] + ')';
+			grad.addColorStop( i*1/5, color );
+	}	
+	
+	context.fillStyle = grad;
+	context.fillRect(0,0, w, h);		
+}
+console.log( app.resizeColorPicker )
+
+colorCanvas.onmousemove = e => {
+
+	if ( ! mouseDown ) return
+	
+	let x = e.offsetX==undefined?e.layerX:e.offsetX;
+	let y = e.offsetY==undefined?e.layerY:e.offsetY;
+	appl.colorPick.style.marginLeft = x + 'px';
+
+	let p = context.getImageData(x, y, 1, 1).data;
+	let hex = "0x" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+	
+	s.matLightMain.color.setHex( hex )	
+	s.matGlow.color.setHex( hex )			
+}		
+
+
+/** INTERFACE CALLBACK CALCK PARAMS ***************/ 
+ 
 const htmlAddBoardWidth = val => {
 	$('#width').html( val.toFixed() )
 }
 
+const calckPrice = () => {
 
-/** BUTTONS IMG ****************************/
-/*
-const backImgHtml = document.getElementById('upload-img')
-const posBackImg = {
-	left: 0,
-	top: 0,
-	width: 100
-}
-
-
-$('#imgMoveLeft').click( () => { 
-	posBackImg.left -= 10
-	backImgHtml.style.marginLeft = posBackImg.left + "px"
-})
-	
-$('#imgMoveRight').click( () => {
-	posBackImg.left += 10
-	backImgHtml.style.marginLeft = posBackImg.left + "px"
-})
-
-$('#imgMoveTop').click( () => {
-	posBackImg.top -= 10
-	backImgHtml.style.marginTop = posBackImg.top + "px"	
-})
+	let price = dataT.height * pr[dataT.typeBoard][dataT.typeLight].height10 *
+				dataT.size * pr[dataT.typeBoard][dataT.typeLight].size10 * 
+				dataT.textValue.length
+				
+	let str = String( price )  
+	str = str.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ')
+	$('#price').html( str );	
+}	
 
 
-$('#imgMoveBottom').click( () => {
-	posBackImg.top += 10
-	backImgHtml.style.marginTop = posBackImg.top + "px"	
-})
-
-$('#imgMore').click( () => {
-	posBackImg.width += 10
-	backImgHtml.style.width = posBackImg.width + "%"	
-})
-
-$('#imgLess').click( () => {
-	posBackImg.width -= 10
-	backImgHtml.style.width = posBackImg.width + "%"
-});
-
-
-$('#imgDell').click( () => {
-	backImgHtml.src = "#"
-});
-
-*/
 
 /**************************************************;
  * MAT SHADERS
  **************************************************/
 
-/** MAT BLACK SHADER */
+
 const ShadowShader = {
 	uniforms: {
 	},
@@ -851,7 +877,6 @@ const ShadowShader = {
 	].join( "\n" )
 };
 
-/** MAT WHITE SHADER LIGHT */
 const LightShader = {
 	uniforms: {
 		iTime: { value: null }		
@@ -875,4 +900,4 @@ const LightShader = {
 	].join( "\n" )
 };
 
-
+ 
