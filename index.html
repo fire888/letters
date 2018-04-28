@@ -16,9 +16,10 @@
 	
 	body { 
 		font-family: 'roboto';
-		
+		overflow: hidden;
 		color: #788a93;
 		font-size: 12px;
+		background-color: #000000;		
 	}
 	
 	.text-interface {
@@ -137,13 +138,82 @@ const pr = {
 	'font3': 1.7
 }
 
+/** VALUES FOR COLORS */
+const colors = {
+
+	'000': 'opasity100',
+	'010': '#ffffff',
+	'020': '#ff8e00',
+	'019': '#f79e00',
+	'021': '#ffae00',
+	'022': '#ffbe00',
+	'036': '#e75100',
+	
+	'035': '#ff6100',
+	'404': '#4e1371',
+	'040': '#520063',
+	'043': '#844994',
+	'042': '#d692b5',
+	'041': '#ce046b',
+	'045': '#ef71a5',
+	'057': '#1b5094',
+	
+	'051': '#0d4c8a',
+	'098': '#0d579f',
+	'052': '#005db5',
+	'084': '#0084bd',
+	'053': '#00a3d0',
+	'066': '#106963',
+	'064': '#399600',
+	
+	'063': '#6b9e00',
+	'080': '#391c10',
+	'083': '#b54900',
+	'081': '#ad7142',
+	'082': '#d6b27b',	
+	'023': '#d6b27b',//!!!!!	
+	'070': '#000000',	
+	'092': '#000000',//!!!!	
+	
+	'026': '#8d0000',
+	'312': '#9e0000',
+	'030': '#ae0000',	
+	'031': '#c30000',		
+	'032': '#d62800',	
+	'047': '#ef330a',
+	'034': '#ef4900',
+	
+	'562': '#10002e',
+	'518': '#1c043c',
+	'050': '#100452',
+	'065': '#18088c',
+	'049': '#18238a',
+	'086': '#1000a5',
+	'067': '#1b3ea8',
+	
+	'054': '#00967b',
+	'055': '#52cb8c',
+	'060': '#185531',
+	'613': '#186b35',
+	'061': '#007d39',
+	'068': '#008637',
+	'062': '#007d18',	
+	
+	'073': '#425520',
+	'071': '#5a626c',
+	'076': '#6f7479',
+	'074': '#a7a7a7',
+	'072': '#d7d7d7',
+	'090': '#a7a7a7', //!!!!!!!
+	'091': '#f79e00' //!!!!!!!!!	
+} 
 </script>
 
 
-<div id="app" style="display: inline-table; width: 100%; height: 725px; overflow: hidden; background-color: #000000;" >
+<div id="app" style="display: block; width: 100%; height: 100%; overflow: hidden; background-color: #000000;" >
 
 	<canvas id="canvas-webgl" class="p-canvas-webgl" style = "float: left;"></canvas>	
-	<div id = "sceneSettings" style = "position: absolute; right: 0px; width: 26%; z-index: 200; text-align: center; background-color: #002432;" >
+	<div id = "sceneSettings" style = "position: absolute; right: 0px; width: 26%; height: 100%; z-index: 200; text-align: center; background-color: #002432;" >
 		
 		
 		<span class = "text-interface">Тип вывески</span>	
@@ -186,13 +256,33 @@ const pr = {
 			
 			
 		</div>	
-       	
+
+		<span class = "text-interface">Цвет вывески</span>
+		<div style = "width: 100%;  margin: 0 auto; display: table;">
+			
+			<div id = "colorMainHtml" style = "width: 30%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
+				<span class = "text-interface">Основной</span>
+				<div id ="colorMain" type="text" style = "width: 80%; height: 25px; background-color: #555555;">iii</div>
+				<div class = "colorMainVal">Oracle 641:<span id = "colorMainValParam">--------------</span></div>
+			</div>
+			
+			<div id = "colorAdvHtml" style = "width: 30%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
+				<span class = "text-interface">Дополнительный</span>
+				<div class = "colorAdv" style = "display: table; width: 80%; height: 25px; background-color: #555555;">iii</div>
+				<div class = "colorAdvVal">Oracle 641:<span id = "colorMainAdvParam">--------------</span></div>				
+			</div>			
+			
+			
+		</div>	
+		
+       			
+		<!--
 		<span class = "text-interface">Цвет</span>   
 		<div style = "display: block; position: relative; width: 66%; height: 25px; margin: 0 auto; border-radius: 20px; overflow: hidden;">
 			<div id = "colorPicker" style = "margin-bottom: -25px; width: 3px; height: 25px; background-color: #ffffff; z-index: 100; position: relative;"></div>	
 			<canvas id="colorPikerBar" style="margin: 0 auto;"></canvas>
 		</div>		
-		
+		-->
 		
 		<div style = "margin-top: 50px; margin-bottom: 40px;">
 			<span class = "text-interface" style = "margin-top: 40px; font-size: 16px; width: 80%;">Ориентировочная <br/> стоимость изготовления:</span>
@@ -205,13 +295,16 @@ const pr = {
 			
 	</div>
 </div>
+<div id = 'colorPic' style = "position: absolute; top: 80%; left: 0px; width: 74%; height: 40px; background-color: red; opacity: 0.2;"></div>
+
 
 <div id = 'loader' style = "position: relative; margin-left: 30%; margin-top: -70px; z-index: 100; width: 100px;">
 	<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="160px" height="20px" viewBox="0 0 128 16" xml:space="preserve"><path fill="#e399a8" d="M6.4,4.8A3.2,3.2,0,1,1,3.2,8,3.2,3.2,0,0,1,6.4,4.8Zm12.8,0A3.2,3.2,0,1,1,16,8,3.2,3.2,0,0,1,19.2,4.8ZM32,4.8A3.2,3.2,0,1,1,28.8,8,3.2,3.2,0,0,1,32,4.8Zm12.8,0A3.2,3.2,0,1,1,41.6,8,3.2,3.2,0,0,1,44.8,4.8Zm12.8,0A3.2,3.2,0,1,1,54.4,8,3.2,3.2,0,0,1,57.6,4.8Zm12.8,0A3.2,3.2,0,1,1,67.2,8,3.2,3.2,0,0,1,70.4,4.8Zm12.8,0A3.2,3.2,0,1,1,80,8,3.2,3.2,0,0,1,83.2,4.8ZM96,4.8A3.2,3.2,0,1,1,92.8,8,3.2,3.2,0,0,1,96,4.8Zm12.8,0A3.2,3.2,0,1,1,105.6,8,3.2,3.2,0,0,1,108.8,4.8Zm12.8,0A3.2,3.2,0,1,1,118.4,8,3.2,3.2,0,0,1,121.6,4.8Z"/><g transform="translate(128,16) scale(-1,-1)"><path fill="#bd0b2f" d="M-42.7,3.84A4.16,4.16,0,0,1-38.54,8a4.16,4.16,0,0,1-4.16,4.16A4.16,4.16,0,0,1-46.86,8,4.16,4.16,0,0,1-42.7,3.84Zm12.8-.64A4.8,4.8,0,0,1-25.1,8a4.8,4.8,0,0,1-4.8,4.8A4.8,4.8,0,0,1-34.7,8,4.8,4.8,0,0,1-29.9,3.2Zm12.8-.64A5.44,5.44,0,0,1-11.66,8a5.44,5.44,0,0,1-5.44,5.44A5.44,5.44,0,0,1-22.54,8,5.44,5.44,0,0,1-17.1,2.56Z"/><animateTransform attributeName="transform" type="translate" values="23 0;36 0;49 0;62 0;74.5 0;87.5 0;100 0;113 0;125.5 0;138.5 0;151.5 0;164.5 0;178 0" calcMode="discrete" dur="1170ms" repeatCount="indefinite"/></g></svg>
 </div>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>	
-<script> $('#app').height( $('#settings').height() ); </script>
+<script>$('#app').height( window.innerHeight );</script>
+
 
 <script src='js/libs/three.js'></script>
 <script src='js/libs/EffectComposer.js'></script>

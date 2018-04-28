@@ -1,7 +1,7 @@
 
 # 3d letters
  
-![pic](https://github.com/fire888/letters/blob/master/maps/screenshot.jpg)  
+![pic](https://github.com/fire888/letters/blob/master/jsScene/screenshot.jpg)  
   
   
-[View](http://js.otrisovano.ru/letters) :)
+*In progress* [view](http://js.otrisovano.ru/tests/180320letters/scene) :)

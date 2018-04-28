@@ -99,8 +99,9 @@ s.initScene = () => {
 	
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' )
-	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas } )
-	s.renderer.setClearColor( 0x000000 )
+	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
+	s.renderer.setClearColor( 0x000000, 0.5 );		
+	//s.renderer.setClearColor( 0xffffff )
 	s.handleWindowResize()	
 	
 	s.renderer.gammaInput = true;
@@ -134,6 +135,7 @@ s.initScene = () => {
 	s.bloomPass.radius = 0.55
 	
 	s.bloomPass.renderToScreen = true;
+	//s.renderScene.renderToScreen = true;
 	
 	s.composer = new THREE.EffectComposer( s.renderer );
 	s.composer.setSize( window.innerWidth, window.innerHeight );
@@ -169,10 +171,12 @@ s.animate = () => {
 s.handleWindowResize = () => {
 	
 	let w = window.innerWidth 
-	let h = $("#sceneSettings").height()	
+	let h = window.innerHeight 	
 	
 	/** resize gui */
 	$('#sceneSettings').width( w * 0.26 )	
+	$('#sceneSettings').height( h )
+	
 	appl.resizeColorPicker( w )	
 	
 	if ( w < 1135 ) {
@@ -189,10 +193,7 @@ s.handleWindowResize = () => {
 	s.renderer.setPixelRatio( w * 0.74 / h );	
 	s.renderer.setSize( Math.floor( w * 0.74 ), h );	
 	s.camera.aspect =  w * 0.74 / h ;
-	s.camera.updateProjectionMatrix();
-	$('#app').height( h )
-			
-	if ( $("#sceneSettings").height() != $('#app').height() ) s.handleWindowResize() 	
+	s.camera.updateProjectionMatrix();	
 }
 
 window.addEventListener( 'resize', s.handleWindowResize, false );
@@ -795,9 +796,9 @@ setInterval( appl.checkInputsValues, 100 )
 
 /** COLOR PICKER **********************************/
 
-appl.colorCanvas = document.getElementById('colorPikerBar')
+//appl.colorCanvas = document.getElementById('colorPikerBar')
 appl.colorPick = document.getElementById('colorPicker') 
-appl.context = appl.colorCanvas.getContext('2d')
+//appl.context = appl.colorCanvas.getContext('2d')
 
 let mouseDown = false
 window.onmousedown = e => mouseDown = true
@@ -836,7 +837,7 @@ appl.resizeColorPicker = function( wW = 300, hW = 25, coef = 1 ) {
 	appl.context.fillRect(0,0, w, h);		
 }
 
-appl.colorCanvas.onmousemove = e => {
+/*appl.colorCanvas.onmousemove = e => {
 
 	if ( ! mouseDown ) return
 	
@@ -850,7 +851,7 @@ appl.colorCanvas.onmousemove = e => {
 	s.matLightMain.color.setHex( hex )	
 	s.matGlow.color.setHex( hex )
 	s.matIronColor.color.setHex( hex )	
-}		
+}*/		
 
 
 /** INTERFACE CALLBACK CALCK PARAMS ***************/ 
