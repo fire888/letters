@@ -78,8 +78,50 @@
 		margin: 0 auto; 
 		margin-top: 0%; 
 		padding-left: 20px		
-	} 	
+	}
 	
+	.colorButt {
+		border 2px solid #002432;
+	}
+
+	#colorPic {
+		display: table;
+		position: absolute;
+		bottom: 5px;
+		right: 20%;
+		width: 60%;
+		/*height: 40px;*/
+		margin: 20px;
+		padding: 20px;
+		background-color: #002432;
+		z-index: 3000;
+		border: 1px solid #555555;
+		border-radius: 20px;
+	}
+
+	.colorItem {
+		transition: 0.3s;
+		width: 30px;
+		height: 30px;	
+		float: left;
+		margin: 2px;	
+		border-radius: 15px;
+		border: 2px solid #002432;	
+		cursor: pointer;
+	}
+	
+	.colorItem:hover {
+		border: 2px solid #ffffff;				
+	}	
+	
+	#hidePallete {
+		text-align: center;
+		margin-bottom: 10px;
+	}
+	
+	#hidePallete img {
+		margin-bottom: -2px;
+	}	
   </style> 		
 </head>
 <body>
@@ -139,74 +181,74 @@ const pr = {
 }
 
 /** VALUES FOR COLORS */
-const colors = {
+const colors = [
 
-	'000': 'opasity100',
-	'010': '#ffffff',
-	'020': '#ff8e00',
-	'019': '#f79e00',
-	'021': '#ffae00',
-	'022': '#ffbe00',
-	'036': '#e75100',
+	{oracle: '000', hex: 'ffffff'},
+	{oracle: '010', hex: 'ffffff'},
+	{oracle: '020', hex: 'ff8e00'},
+	{oracle: '019', hex: 'f79e00'},
+	{oracle: '021', hex: 'ffae00'},
+	{oracle: '022', hex: 'ffbe00'},
+	{oracle: '036', hex: 'e75100'},
 	
-	'035': '#ff6100',
-	'404': '#4e1371',
-	'040': '#520063',
-	'043': '#844994',
-	'042': '#d692b5',
-	'041': '#ce046b',
-	'045': '#ef71a5',
-	'057': '#1b5094',
+	{oracle: '035', hex: 'ff6100'},
+	{oracle: '404', hex: '4e1371'},
+	{oracle: '040', hex: '520063'},
+	{oracle: '043', hex: '844994'},
+	{oracle: '042', hex: 'd692b5'},
+	{oracle: '041', hex: 'ce046b'},
+	{oracle: '045', hex: 'ef71a5'},
+	{oracle: '057', hex: '1b5094'},
 	
-	'051': '#0d4c8a',
-	'098': '#0d579f',
-	'052': '#005db5',
-	'084': '#0084bd',
-	'053': '#00a3d0',
-	'066': '#106963',
-	'064': '#399600',
+	{oracle: '051', hex: '0d4c8a'},
+	{oracle: '098', hex: '0d579f'},
+	{oracle: '052', hex: '005db5'},
+	{oracle: '084', hex: '0084bd'},
+	{oracle: '053', hex: '00a3d0'},
+	{oracle: '066', hex: '106963'},
+	{oracle: '064', hex: '399600'},
 	
-	'063': '#6b9e00',
-	'080': '#391c10',
-	'083': '#b54900',
-	'081': '#ad7142',
-	'082': '#d6b27b',	
-	'023': '#d6b27b',//!!!!!	
-	'070': '#000000',	
-	'092': '#000000',//!!!!	
+	{oracle: '063', hex: '6b9e00'},
+	{oracle: '080', hex: '391c10'},
+	{oracle: '083', hex: 'b54900'},
+	{oracle: '081', hex: 'ad7142'},
+	{oracle: '082', hex: 'd6b27b'},	
+	{oracle: '023', hex: 'd6b27b'},//!!!!!	
+	{oracle: '070', hex: '000000'},	
+	{oracle: '092', hex: '000000'},//!!!!
 	
-	'026': '#8d0000',
-	'312': '#9e0000',
-	'030': '#ae0000',	
-	'031': '#c30000',		
-	'032': '#d62800',	
-	'047': '#ef330a',
-	'034': '#ef4900',
+	{oracle: '026', hex: '8d0000'},
+	{oracle: '312', hex: '9e0000'},
+	{oracle: '030', hex: 'ae0000'},	
+	{oracle: '031', hex: 'c30000'},		
+	{oracle: '032', hex: 'd62800'},	
+	{oracle: '047', hex: 'ef330a'},
+	{oracle: '034', hex: 'ef4900'},
 	
-	'562': '#10002e',
-	'518': '#1c043c',
-	'050': '#100452',
-	'065': '#18088c',
-	'049': '#18238a',
-	'086': '#1000a5',
-	'067': '#1b3ea8',
+	{oracle: '562', hex: '10002e'},
+	{oracle: '518', hex: '1c043c'},
+	{oracle: '050', hex: '100452'},
+	{oracle: '065', hex: '18088c'},
+	{oracle: '049', hex: '18238a'},
+	{oracle: '086', hex: '1000a5'},
+	{oracle: '067', hex: '1b3ea8'},
 	
-	'054': '#00967b',
-	'055': '#52cb8c',
-	'060': '#185531',
-	'613': '#186b35',
-	'061': '#007d39',
-	'068': '#008637',
-	'062': '#007d18',	
+	{oracle: '054', hex: '00967b'},
+	{oracle: '055', hex: '52cb8c'},
+	{oracle: '060', hex: '185531'},
+	{oracle: '613', hex: '186b35'},
+	{oracle: '061', hex: '007d39'},
+	{oracle: '068', hex: '008637'},
+	{oracle: '062', hex: '007d18'},	
 	
-	'073': '#425520',
-	'071': '#5a626c',
-	'076': '#6f7479',
-	'074': '#a7a7a7',
-	'072': '#d7d7d7',
-	'090': '#a7a7a7', //!!!!!!!
-	'091': '#f79e00' //!!!!!!!!!	
-} 
+	{oracle: '073', hex: '425520'},
+	{oracle: '071', hex: '5a626c'},
+	{oracle: '076', hex: '6f7479'},
+	{oracle: '074', hex: 'a7a7a7'},
+	{oracle: '072', hex: 'd7d7d7'},
+	{oracle: '090', hex: 'a7a7a7'}, //!!!!!!!
+	{oracle: '091', hex: 'f79e00'} //!!!!!!!!!
+  ]	 
 </script>
 
 
@@ -260,29 +302,17 @@ const colors = {
 		<span class = "text-interface">Цвет вывески</span>
 		<div style = "width: 100%;  margin: 0 auto; display: table;">
 			
-			<div id = "colorMainHtml" style = "width: 30%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
+			<div id = "colorMainHtml" style = "width: 35%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
 				<span class = "text-interface">Основной</span>
-				<div id ="colorMain" type="text" style = "width: 80%; height: 25px; background-color: #555555;">iii</div>
-				<div class = "colorMainVal">Oracle 641:<span id = "colorMainValParam">--------------</span></div>
+				<button id ="colorMain" class = 'colorButt' style = "width: 80%; height: 25px; width: 80%; background-color: #c30000;"></button>
 			</div>
 			
-			<div id = "colorAdvHtml" style = "width: 30%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
-				<span class = "text-interface">Дополнительный</span>
-				<div class = "colorAdv" style = "display: table; width: 80%; height: 25px; background-color: #555555;">iii</div>
-				<div class = "colorAdvVal">Oracle 641:<span id = "colorMainAdvParam">--------------</span></div>				
+			<div id = "colorAdvHtml" style = "width: 35%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
+				<span class = "text-interface">Дополнит.</span>
+				<button id = "colorAdv" class = 'colorButt' style = "width: 80%; height: 25px; width: 80%; background-color: #ffffff;"></button>
 			</div>			
 			
-			
-		</div>	
-		
-       			
-		<!--
-		<span class = "text-interface">Цвет</span>   
-		<div style = "display: block; position: relative; width: 66%; height: 25px; margin: 0 auto; border-radius: 20px; overflow: hidden;">
-			<div id = "colorPicker" style = "margin-bottom: -25px; width: 3px; height: 25px; background-color: #ffffff; z-index: 100; position: relative;"></div>	
-			<canvas id="colorPikerBar" style="margin: 0 auto;"></canvas>
-		</div>		
-		-->
+		</div>
 		
 		<div style = "margin-top: 50px; margin-bottom: 40px;">
 			<span class = "text-interface" style = "margin-top: 40px; font-size: 16px; width: 80%;">Ориентировочная <br/> стоимость изготовления:</span>
@@ -295,7 +325,12 @@ const colors = {
 			
 	</div>
 </div>
-<div id = 'colorPic' style = "position: absolute; top: 80%; left: 0px; width: 74%; height: 40px; background-color: red; opacity: 0.2;"></div>
+<div id = 'colorPic' style = "display: none">
+	<div style = "text-align: center; width: 5%; height: 100%; float: right;">
+		<button id = "hidePallete"><img src = "maps/close.png"/></button>
+	</div>
+	<div id = 'containerColors' style = "float: left; width: 88% ">
+</div>
 
 
 <div id = 'loader' style = "position: relative; margin-left: 30%; margin-top: -70px; z-index: 100; width: 100px;">

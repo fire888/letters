@@ -7,10 +7,7 @@
  * VARS SPACES
  **************************************************/
 
-const appl = {
-	
-	resizeColorPicker: null
-}  
+const ui = {}  
  
 const s = {
 	
@@ -25,9 +22,7 @@ const s = {
  **************************************************/
  
 const loadAssets = () => new Promise ( ( resolve )=> {
-			
-		appl.resizeColorPicker( window.innerWidth, window.innerHeight )
-		
+					
 		s.mapGlow = s.textureLoader.load( 
 			"maps/map-glow.png",
 			() => resolve()			
@@ -77,8 +72,9 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 	s.initMaterials()
 	s.initScene()	
 	s.createText()
-	appl.calckPrice()	
-	s.animate()		
+	ui.calckPrice()		
+	s.animate()	
+	ui.initPallete()	
 } )
  
 window.onload = () => loadAssets() 
@@ -177,8 +173,6 @@ s.handleWindowResize = () => {
 	$('#sceneSettings').width( w * 0.26 )	
 	$('#sceneSettings').height( h )
 	
-	appl.resizeColorPicker( w )	
-	
 	if ( w < 1135 ) {
 		
 		$('#sizeWrapper').css( { 'width': '70%', 'float': 'none', 'padding-left': '0px' } );
@@ -263,7 +257,6 @@ class Letters {
 	
 	chancheColorPallete() {
 		
-		appl.resizeColorPicker( window.innerWidth, 25, 1 )
 	}
 	
 	setHeight() {
@@ -304,7 +297,7 @@ class Letters {
 		
 		this.centerOffset = -0.5 * ( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )
 		
-		appl.htmlAddBoardWidth( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )	
+		ui.htmlAddBoardWidth( this.geom.boundingBox.max.x - this.geom.boundingBox.min.x )	
 		
 		this.mesh.position.x = this.centerOffset
 		this.mesh.position.y = dataT.hover
@@ -475,7 +468,6 @@ class CorobLetters extends Letters {
 	
 	chancheColorPallete() {
 		
-		appl.resizeColorPicker( window.innerWidth, 25, 0.4 )
 	}
 	
 	setBlummPass() {
@@ -538,7 +530,6 @@ class CorobLettersOpen extends CorobLetters {
 	
 	chancheColorPallete() {
 		
-		appl.resizeColorPicker( window.innerWidth, 25, 1.0 )
 	}
 	
 	setBlummPass() {
@@ -581,7 +572,6 @@ class CorobLettersContr extends CorobLetters {
 	
 	chancheColorPallete() {
 		
-		appl.resizeColorPicker( window.innerWidth, 25, 1 )
 	}
 
 	setBlummPass() {
@@ -632,7 +622,7 @@ class CorobLettersNoneLight extends CorobLettersContr {
  
 s.createText = () => {
 	
-	if ( app.loaderIcon ) app.loaderIcon.style.display = 'block'
+	if ( ui.loaderIcon ) ui.loaderIcon.style.display = 'block'
 	
 	if ( sceneText ) sceneText.remove()
 	
@@ -678,7 +668,7 @@ s.createText = () => {
 		}		
 	}
 	
-	if ( app.loaderIcon ) app.loaderIcon.style.display = 'none'
+	if ( ui.loaderIcon ) ui.loaderIcon.style.display = 'none'
 } 
 
 
@@ -687,7 +677,7 @@ s.createText = () => {
  * INIT INTERFACE 
  **************************************************/
  
-app.loaderIcon = document.getElementById('loader');  
+ui.loaderIcon = document.getElementById('loader');  
  
 
 /** BUTTONS ***************************************/ 
@@ -701,7 +691,7 @@ $('.typeBoard').click( ( e ) => {
 	
 	dataT.typeBoard = e.target.value	
 	s.createText()
-	appl.calckPrice()	
+	ui.calckPrice()	
 } ) 
 
 $('.typeLight').click( ( e ) => { 
@@ -713,7 +703,7 @@ $('.typeLight').click( ( e ) => {
 	
 	dataT.typeLight = e.target.value 
 	s.createText()
-	appl.calckPrice()	
+	ui.calckPrice()	
 } )
   
 $('.font').click( ( e ) => { 
@@ -736,132 +726,129 @@ $('.font').click( ( e ) => {
 			break
 	}	
 	s.createText()
-	appl.calckPrice()	
+	ui.calckPrice()	
 } )
 
 
 /** INPUTS ****************************************/ 
 
-appl.inputsHtml = document.getElementsByClassName('inputs');
-appl.inputsValues = [];
-appl.inputsValuesOld = [];
+ui.inputsHtml = document.getElementsByClassName('inputs');
+ui.inputsValues = [];
+ui.inputsValuesOld = [];
 
-appl.getInputsValues = () => {
+ui.getInputsValues = () => {
 	let arr = [];
-	for( let i = 0; i < appl.inputsHtml.length; i ++ ){
-		arr.push( appl.inputsHtml[i].value );
+	for( let i = 0; i < ui.inputsHtml.length; i ++ ){
+		arr.push( ui.inputsHtml[i].value );
 	}
 	return arr;
 }
 
-appl.inputsValuesOld = appl.getInputsValues();
+ui.inputsValuesOld = ui.getInputsValues();
 
-appl.checkInputsValues = () => {
+ui.checkInputsValues = () => {
 
-	appl.inputsValues = appl.getInputsValues();
+	ui.inputsValues = ui.getInputsValues();
 	
-	for ( let i =0; i< appl.inputsValues.length; i++ ) {
+	for ( let i =0; i< ui.inputsValues.length; i++ ) {
 	
-		if ( appl.inputsValuesOld[i] != appl.inputsValues[i] ) {
+		if ( ui.inputsValuesOld[i] != ui.inputsValues[i] ) {
 			
-			appl.inputsValuesOld = appl.getInputsValues(); 
-			appl.checkChanges( i );
+			ui.inputsValuesOld = ui.getInputsValues(); 
+			ui.checkChanges( i );
 		}
 	}		
 }
 
-appl.checkChanges = ( i ) => {
+ui.checkChanges = ( i ) => {
 
-	switch( appl.inputsHtml[i].id ) {
+	switch( ui.inputsHtml[i].id ) {
 		
 		case "mainText": 
-			dataT.textValue = appl.inputsHtml[i].value
+			dataT.textValue = ui.inputsHtml[i].value
 			break
 		case "height":
-			if ( appl.inputsHtml[i].value < 1 ) appl.inputsHtml[i].value = 1
-			dataT.heightBoard = appl.inputsHtml[i].value;
-			dataT.valFrontZ = appl.inputsHtml[i].value; 			
+			if ( ui.inputsHtml[i].value < 1 ) ui.inputsHtml[i].value = 1
+			dataT.heightBoard = ui.inputsHtml[i].value;
+			dataT.valFrontZ = ui.inputsHtml[i].value; 			
 			break
 		case "size": 
-			dataT.size = appl.inputsHtml[i].value
+			dataT.size = ui.inputsHtml[i].value
 			break
 	}	
 		
 	s.createText()
-	appl.calckPrice()
+	ui.calckPrice()
 }
 
-setInterval( appl.checkInputsValues, 100 )
+setInterval( ui.checkInputsValues, 100 )
 
 
 /** COLOR PICKER **********************************/
 
-//appl.colorCanvas = document.getElementById('colorPikerBar')
-appl.colorPick = document.getElementById('colorPicker') 
-//appl.context = appl.colorCanvas.getContext('2d')
+ui.pallete = document.getElementById( 'colorPic' )
+ui.currentColorPallete = 'none' // 'main', 'adv'
 
-let mouseDown = false
-window.onmousedown = e => mouseDown = true
-window.onmouseup = e => mouseDown = false
-
-const rgbToHex = ( r, g, b ) => {
+$( ui.pallete ).click( ( e ) => {
 	
-    if ( r > 255 || g > 255 || b > 255 )
-        throw "Invalid color component";
-    return ( ( r << 16 ) | ( g << 8 ) | b ).toString( 16 );
-}
+	if ( ! colors[e.target.id] ) return
 
-
-appl.resizeColorPicker = function( wW = 300, hW = 25, coef = 1 ) {
-	
-	if ( ! appl.colorCanvas ) return 
-	if ( ! appl.colorCanvas.getContext ) return
-	
-	let w = Math.floor( wW * 0.2 ) 
-	let h = 25 
-
-	appl.colorCanvas.width = w
-	appl.colorCanvas.height = h 
-	let grad = appl.context.createLinearGradient( 0, 0, w, 0);
-	let val = 255 * coef
-	let val2 = 50
-	if ( coef < 1) val2 = 0
-	let cols = [ [val,0,0], [val,val,0], [0,val,0], [0,val,val], [val2, val2, val], [val, 0 ,val] ];
-	
-	for ( var i = 0; i <= 5; i ++ ) {
-		let color = 'rgb(' +  cols[i][0] + ',' + cols[i][1] + ',' + cols[i][2] + ')';
-		grad.addColorStop( i*1/5, color );
+	if ( ui.currentColorPallete == 'main') {	
+		s.matLightMain.color.setHex( eval( "0x" + colors[e.target.id].hex ) )
+		s.matIronColor.color.setHex( eval( "0x" + colors[e.target.id].hex ) )
+		$('#colorMain').css( { 'backgroundColor': "#" + colors[e.target.id].hex } )
 	}	
+
+	if ( ui.currentColorPallete == 'adv') {	
+		s.matIron.color.setHex( eval( "0x" + colors[e.target.id].hex ) )
+		$('#colorAdv').css( { 'backgroundColor': "#" + colors[e.target.id].hex } )	
+	}	
+} )	
+
+ui.initPallete = () => {
 	
-	appl.context.fillStyle = grad;
-	appl.context.fillRect(0,0, w, h);		
+	/** init colors */
+	let c = document.getElementById( 'containerColors' )
+	colors.forEach( ( item, i ) => {
+		let d = document.createElement( 'div' )
+		d.id = i
+		d.className = 'colorItem'	
+		d.style.backgroundColor = "#" + item.hex
+		c.appendChild( d )	
+	}  )
+		
+	/** init listener buttoms */	
+	$('#colorMain').click( ( e ) => {
+		ui.currentColorPallete = 'main'
+		$( '#colorAdv' ).css( { 'border': '2px solid #002432' } )		
+		$( e.target ).css( { 'border': '2px solid #ff0000' } )
+		ui.pallete.style.display = 'table'	
+	} )
+
+	$('#colorAdv').click( ( e ) => {
+		ui.currentColorPallete = 'adv'
+		ui.pallete.style.display = 'table'
+		$( '#colorMain' ).css( { 'border': '2px solid #002432' } )		
+		$( e.target ).css( { 'border': '2px solid #ff0000' } )		
+	} )
+
+	$('#hidePallete').click( ( e ) => {
+		ui.currentColorPallete = 'none'
+		ui.pallete.style.display = 'none'
+		$( '#colorMain' ).css( { 'border': '2px solid #002432' } )
+		$( '#colorAdv' ).css( { 'border': '2px solid #002432' } )			
+	} )	
 }
-
-/*appl.colorCanvas.onmousemove = e => {
-
-	if ( ! mouseDown ) return
-	
-	let x = e.offsetX == undefined ? e.layerX : e.offsetX
-	let y = e.offsetY == undefined ? e.layerY : e.offsetY
-	appl.colorPick.style.marginLeft = x + 'px'
-
-	let p = appl.context.getImageData(x, y, 1, 1).data;
-	let hex = "0x" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
-	
-	s.matLightMain.color.setHex( hex )	
-	s.matGlow.color.setHex( hex )
-	s.matIronColor.color.setHex( hex )	
-}*/		
 
 
 /** INTERFACE CALLBACK CALCK PARAMS ***************/ 
  
-appl.htmlAddBoardWidth = val => {
+ui.htmlAddBoardWidth = val => {
 	
 	$('#width').html( val.toFixed() )
 }
 
-appl.calckPrice = () => {
+ui.calckPrice = () => {
 
 	let price = dataT.heightBoard * 
 				pr[dataT.typeBoard][dataT.typeLight].height10 *
@@ -884,7 +871,7 @@ appl.calckPrice = () => {
 s.initMaterials = () => {
 	
 	s.matLightMain = new THREE.MeshBasicMaterial( { 
-		color: 0x3f2fff,
+		color: 0xc30000,
 		flatShading: true,		
 	})
 	
