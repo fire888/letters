@@ -2,133 +2,134 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <style>
-  
-	@font-face {
-		font-family: 'roboto';
-		src: url('fonts/Roboto-Regular.ttf');
-	} 
-  
-	* { 
-		margin: 0px; 
-		padding: 0px; 
-	}
-	
-	body { 
-		font-family: 'roboto';
-		overflow: hidden;
-		color: #788a93;
-		font-size: 12px;
-		background-color: #000000;		
-	}
-	
-	.text-interface {
-		display: block;	
-		margin: 0 auto;
-		margin-top: 15px;
-		margin-bottom: 5px;
-	}
-		
-	.checkOn { 
-		background-color: #ef243a;
-		box-shadow: 0 0 20px rgba( 220, 30, 9, 0.9 ); 	
-	}
-	
-	button:hover {
-		background-color: #4e909a;
-	}
-	
-	.typeBoard {
-		width: 34%;
-		min-width: 100px;
-	}	
-	
-	.font {
-		width: 22%;
-		min-width: 100px;
-	}	
-	
-	.typeLight {
-		width: 70%;
-	}
-
-	button {
-		background-color: #2d5063;
-		border: 0px;
-		padding: 5px;
-		border-radius: 20px;
-		color: white;
-		margin: 4px;
-		transition: 0.3s;	
-	}
-	
-	button:hover {
-		background-color: #4e909a;
-	}	
-	
-	input {
-		border: 0px;	
-		background-color: #4e909a;	
-		border-radius: 20px;
-		color: white;  
-		width: 64%;	
-		height: 26px;
-		display: block; 
-		position: relative; 
-		margin: 0 auto; 
-		margin-top: 0%; 
-		padding-left: 20px		
-	}
-	
-	.colorButt {
-		border 2px solid #002432;
-	}
-
-	#colorPic {
-		display: table;
-		position: absolute;
-		bottom: 5px;
-		right: 20%;
-		width: 60%;
-		/*height: 40px;*/
-		margin: 20px;
-		padding: 20px;
-		background-color: #002432;
-		z-index: 3000;
-		border: 1px solid #555555;
-		border-radius: 20px;
-	}
-
-	.colorItem {
-		transition: 0.3s;
-		width: 30px;
-		height: 30px;	
-		float: left;
-		margin: 2px;	
-		border-radius: 15px;
-		border: 2px solid #002432;	
-		cursor: pointer;
-	}
-	
-	.colorItem:hover {
-		border: 2px solid #ffffff;				
-	}	
-	
-	#hidePallete {
-		text-align: center;
-		margin-bottom: 10px;
-	}
-	
-	#hidePallete img {
-		margin-bottom: -2px;
-	}	
-  </style> 		
+  <link href="styles/style.css" type="text/css" rel="stylesheet"/>		
 </head>
 <body>
 
+
+<!--- APPLICATION UI ------> 
+
+<div id="app" style="display: block; width: 100%; height: 100%; overflow: hidden; background-color: #000000;" >
+
+	<canvas id="canvas-webgl" class="p-canvas-webgl" style = "float: left;"></canvas>	
+	<div id = "sceneSettings" style = "position: absolute; right: 0px; width: 26%; height: 100%; z-index: 200; text-align: center; background-color: #002432;" >
+		
+		
+		<span class = "text-interface">Тип вывески</span>	
+		<button class = "typeBoard checkOn" value = "letters">Объемные буквы</button>
+		<button class = "typeBoard" value = "box">Световые короба</button>
+	
+	
+		<span class = "text-interface">Тип букв</span>
+		<button class = "font checkOn" value="font1">Без засечек</button>
+		<button class = "font" value="font2">С засечками</button>
+		<button class = "font" value="font3">Декоративный</button>
+	
+	
+		<span class = "text-interface">Tип подсветки</span>
+		<button class = "typeLight checkOn" value="front">Лицевая</button><br/>
+		<button class = "typeLight" value="frontPlus">Лицевая и торец</button><br/>
+		<button class = "typeLight" value="open">Открытые светодиоды</button><br/>
+		<button class = "typeLight" value="contr">Контражур</button><br/>
+		<button class = "typeLight" value="none">Без подсветки</button>		
+	
+	
+		<span class = "text-interface">Tекст для вывески</span>   
+		<input class = "inputs" id ="mainText" type="text" value="Citygrafika"/>
+		
+		
+		<div style = "width: 100%;  margin: 0 auto; display: table;">
+		
+			<span class = "text-interface">Размеры вывески</span>
+			
+			<div id = "sizeWrapper" style = "width: 30%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
+				<span class = "underText">Высота (см)</span>
+				<input class = "inputs" id ="size" type="text" value="50" style = "width: 80%;"/>
+				<div class = "underText">ширина: <span id = "width">270</span> см</div >
+			</div>
+		
+		
+			<div id = "heightWrapper" style = "width: 30%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
+				<span class = "underText">Глубина (см)</span>
+				<input class = "inputs" id = "height" type = "text" value = "10" style = "width: 80%;"/>
+			</div>	
+			
+		</div>	
+			
+		<span class = "text-interface">Цвет вывески</span>	
+		<div style = "text-align: left; width: 70%; margin: 0 auto;">	
+			<button class = 'colorButt' value = 'colorMain' style = "width: 60%; height: 25px; background-color: #c30000;"></button>
+			<span id = 'colorMainVal'>031</span>:&nbsp;основной		
+		</div>
+		<div style = "text-align: left; width: 70%; margin: 0 auto;">
+			<button class = 'colorButt' value = 'colorAdv' style = "width: 60%; height: 25px; background-color: #ffffff;"></button>
+			<span id = 'colorAdvVal'>010</span>:&nbsp;дополнит.			
+		</div>
+		<div id = 'colorBoxSide' style = "text-align: left; width: 70%; margin: 0 auto; display: none;">	
+			<button class = 'colorButt' value = 'colorBoxSide' style = "width: 60%; height: 25px; background-color: #c30000;"></button>	
+			<span id = 'colorBoxSideSetVal'>031</span>:&nbsp;торец				
+		</div>		
+		
+		<div style = "margin-top: 50px; margin-bottom: 20px;">
+			<span class = "text-interface" style = "margin-top: 40px; font-size: 16px; width: 80%;">Ориентировочная <br/> стоимость изготовления:</span>
+			<div style="margin-top: 10px;">
+				<span id = "price" style = "font-size: 18px; color: #ffffff;"></span>
+				<span>&nbsp;&nbsp;&nbsp;руб.</span>
+			</div>	
+		</div>
+			
+		<button id = "showUserForms" class ='checkOn' style = 'width: 70%; height: 30px; font-size: 16px'>Сделать запрос</button>			
+	</div>
+</div>
+
+<div id = 'colorPic' style = "display: none">
+	<div style = "text-align: center; width: 5%; height: 100%; float: right;">
+		<button id = "hidePallete"><img src = "maps/close.png"/></button>
+	</div>
+	<div id = 'containerColors' style = "float: left; width: 88% "></div>
+</div>
+
+<div id = 'formsInsertUserData' style = 'display: none;'>
+	<div style = " width: 5%; height: 100%; float: right;">
+		<button id = "hideUserForms"><img src = "maps/close.png"/></button>
+	</div>
+	<div id = 'containerForms' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%">
+		<div class = 'userFormText'>Наши менеджеры обработают Ваш запрос и перезвонят Вам.<br/> Пожалуйста, оставьте Ваши контактные данные.</div><br/>
+		<input class = "userForm" id ="mail" type="text" value="" style="margin-top: 5%"/>
+		<span class = 'userFormText'>Почта</span><br/><br/>
+		<input class = "userForm" id ="phone" type="text" value=""/>
+		<span class = 'userFormText'>Телефон</span><br/><br/>	
+		<input class = "userForm" id ="name" type="text" value=""/>
+		<span class = 'userFormText'>Как к Вам обратиться</span><br/><br/><br/>		
+		<button id = "sendOrder" class ='checkOn' style = 'width: 33.5%; height: 30px; font-size: 16px; margin-left: 15px; margin-bottom: 30px'>Отправка</button>	
+	</div>	
+	<div id = 'sendMessage' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%; display: none">
+		<div class = 'userFormText'>Запрос отпрален</div><br/>	
+	</div>	
+	
+</div>
+
+
+<div id = 'loader' style = "position: relative; margin-top: -300px; z-index: 1000; width: 76%; text-align: center;">
+	<img src = 'maps/loading.gif'>
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>	
+<script>$('#app').height( window.innerHeight );</script>
+
+<!--- END APPLICATION UI --->
+
+
+
 <script>
 
-/** VALUES FOR PRICE */
+/**************************************************;
+ * MAIN PARAMS
+ **************************************************/
+
+ 
+/** VALUES FOR PRICE ******************************/
+
 const pr = {
 	
 	'letters': {
@@ -180,165 +181,127 @@ const pr = {
 	'font3': 1.7
 }
 
-/** VALUES FOR COLORS */
+
+/** VALUES FOR COLORS *****************************/
+
 const colors = [
 
-	{oracle: '000', hex: 'ffffff'},
-	{oracle: '010', hex: 'ffffff'},
-	{oracle: '020', hex: 'ff8e00'},
-	{oracle: '019', hex: 'f79e00'},
-	{oracle: '021', hex: 'ffae00'},
-	{oracle: '022', hex: 'ffbe00'},
-	{oracle: '036', hex: 'e75100'},
+	{ oracle: '000', hex: 'ffffff' },
+	{ oracle: '010', hex: 'ffffff' },
+	{ oracle: '020', hex: 'ff8e00' },
+	{ oracle: '019', hex: 'f79e00' },
+	{ oracle: '021', hex: 'ffae00' },
+	{ oracle: '022', hex: 'ffbe00' },
+	{ oracle: '036', hex: 'e75100' },
 	
-	{oracle: '035', hex: 'ff6100'},
-	{oracle: '404', hex: '4e1371'},
-	{oracle: '040', hex: '520063'},
-	{oracle: '043', hex: '844994'},
-	{oracle: '042', hex: 'd692b5'},
-	{oracle: '041', hex: 'ce046b'},
-	{oracle: '045', hex: 'ef71a5'},
-	{oracle: '057', hex: '1b5094'},
+	{ oracle: '035', hex: 'ff6100' },
+	{ oracle: '404', hex: '4e1371' },
+	{ oracle: '040', hex: '520063' },
+	{ oracle: '043', hex: '844994' },
+	{ oracle: '042', hex: 'd692b5' },
+	{ oracle: '041', hex: 'ce046b' },
+	{ oracle: '045', hex: 'ef71a5' },
+	{ oracle: '057', hex: '1b5094' },
 	
-	{oracle: '051', hex: '0d4c8a'},
-	{oracle: '098', hex: '0d579f'},
-	{oracle: '052', hex: '005db5'},
-	{oracle: '084', hex: '0084bd'},
-	{oracle: '053', hex: '00a3d0'},
-	{oracle: '066', hex: '106963'},
-	{oracle: '064', hex: '399600'},
+	{ oracle: '051', hex: '0d4c8a' },
+	{ oracle: '098', hex: '0d579f' },
+	{ oracle: '052', hex: '005db5' },
+	{ oracle: '084', hex: '0084bd' },
+	{ oracle: '053', hex: '00a3d0' },
+	{ oracle: '066', hex: '106963' },
+	{ oracle: '064', hex: '399600' },
 	
-	{oracle: '063', hex: '6b9e00'},
-	{oracle: '080', hex: '391c10'},
-	{oracle: '083', hex: 'b54900'},
-	{oracle: '081', hex: 'ad7142'},
-	{oracle: '082', hex: 'd6b27b'},	
-	{oracle: '023', hex: 'd6b27b'},//!!!!!	
-	{oracle: '070', hex: '000000'},	
-	{oracle: '092', hex: '000000'},//!!!!
+	{ oracle: '063', hex: '6b9e00' },
+	{ oracle: '080', hex: '391c10' },
+	{ oracle: '083', hex: 'b54900' },
+	{ oracle: '081', hex: 'ad7142' },
+	{ oracle: '082', hex: 'd6b27b' },	
+	{ oracle: '023', hex: 'd6b27b' },   //!!!! miss	
+	{ oracle: '070', hex: '000000' },	
+	{ oracle: '092', hex: '000000' },   //!!!! miss	
 	
-	{oracle: '026', hex: '8d0000'},
-	{oracle: '312', hex: '9e0000'},
-	{oracle: '030', hex: 'ae0000'},	
-	{oracle: '031', hex: 'c30000'},		
-	{oracle: '032', hex: 'd62800'},	
-	{oracle: '047', hex: 'ef330a'},
-	{oracle: '034', hex: 'ef4900'},
+	{ oracle: '026', hex: '8d0000' },
+	{ oracle: '312', hex: '9e0000' },
+	{ oracle: '030', hex: 'ae0000' },	
+	{ oracle: '031', hex: 'c30000' },		
+	{ oracle: '032', hex: 'd62800' },	
+	{ oracle: '047', hex: 'ef330a' },
+	{ oracle: '034', hex: 'ef4900' },
 	
-	{oracle: '562', hex: '10002e'},
-	{oracle: '518', hex: '1c043c'},
-	{oracle: '050', hex: '100452'},
-	{oracle: '065', hex: '18088c'},
-	{oracle: '049', hex: '18238a'},
-	{oracle: '086', hex: '1000a5'},
-	{oracle: '067', hex: '1b3ea8'},
+	{ oracle: '562', hex: '10002e' },
+	{ oracle: '518', hex: '1c043c' },
+	{ oracle: '050', hex: '100452' },
+	{ oracle: '065', hex: '18088c' },
+	{ oracle: '049', hex: '18238a' },
+	{ oracle: '086', hex: '1000a5' },
+	{ oracle: '067', hex: '1b3ea8' },
 	
-	{oracle: '054', hex: '00967b'},
-	{oracle: '055', hex: '52cb8c'},
-	{oracle: '060', hex: '185531'},
-	{oracle: '613', hex: '186b35'},
-	{oracle: '061', hex: '007d39'},
-	{oracle: '068', hex: '008637'},
-	{oracle: '062', hex: '007d18'},	
+	{ oracle: '054', hex: '00967b' },
+	{ oracle: '055', hex: '52cb8c' },
+	{ oracle: '060', hex: '185531' },
+	{ oracle: '613', hex: '186b35' },
+	{ oracle: '061', hex: '007d39' },
+	{ oracle: '068', hex: '008637' },
+	{ oracle: '062', hex: '007d18' },	
 	
-	{oracle: '073', hex: '425520'},
-	{oracle: '071', hex: '5a626c'},
-	{oracle: '076', hex: '6f7479'},
-	{oracle: '074', hex: 'a7a7a7'},
-	{oracle: '072', hex: 'd7d7d7'},
-	{oracle: '090', hex: 'a7a7a7'}, //!!!!!!!
-	{oracle: '091', hex: 'f79e00'} //!!!!!!!!!
-  ]	 
+	{ oracle: '073', hex: '425520' },
+	{ oracle: '071', hex: '5a626c' },
+	{ oracle: '076', hex: '6f7479' },
+	{ oracle: '074', hex: 'a7a7a7' },
+	{ oracle: '072', hex: 'd7d7d7' },
+	{ oracle: '090', hex: 'a7a7a7' },    //!!!! miss	
+	{ oracle: '091', hex: 'f79e00' }     //!!!! miss	
+  ]
+
+  
+/** START TEXT PARAMS *****************************/
+
+const params = {
+
+	typeBoard: 'letters',                /** or 'box'                                         */
+	fontType: 'font2',                   /** : Sans Serif, 'font2': Serif, 'font3': Artistic  */		
+	typeLight: 'front',                  /** 'frontPlus', 'open', 'contr', 'none'             */
+	textValue: 'Citygrafika',            /** start Text                                       */
+	heightBoard: 10, height: 10,         /** bevel Letters	                                  */
+	size: 50,                            /** height Letters                                   */
+	
+	/** insert object from colors */   
+	colorLettersFront: { oracle: '031', hex: 'c30000' }, 
+	colorLettersSide: { oracle: '010', hex: 'ffffff' },
+	colorBoxSide: { oracle: '031', hex: 'c30000' } 	
+}
+
+
+/** ORDER PARAMS ********************************/
+
+/** object order */
+const ORDER = {
+	
+	'Тип_вывески': 'Буквы',	
+	'Шрифт': 'Без засечек',
+	'Подсветка': 'Лицевая',
+	'Текст': 'Citygrafika',
+	'Высота': 50,
+	'Ширина': 300,
+	'Глубина': 10, 
+	'Цвет_Букв': '031',
+	'Цвет_Краев': '010',
+	'Цвет_торца_короба': '031', /** если есть */ 
+	'Цена': 3300,
+	'Почта': 'none',
+	'Телефон': 'none',
+	'Имя': 'none',
+	'Дата': 'none'
+}
+
+/** function send order */
+const SendOrderToServer = () => {
+	/** code for send order */
+	console.log(ORDER)
+}  
+
 </script>
 
-
-<div id="app" style="display: block; width: 100%; height: 100%; overflow: hidden; background-color: #000000;" >
-
-	<canvas id="canvas-webgl" class="p-canvas-webgl" style = "float: left;"></canvas>	
-	<div id = "sceneSettings" style = "position: absolute; right: 0px; width: 26%; height: 100%; z-index: 200; text-align: center; background-color: #002432;" >
-		
-		
-		<span class = "text-interface">Тип вывески</span>	
-		<button class = "typeBoard checkOn" value = "letters">Объемные буквы</button>
-		<button class = "typeBoard" value = "box">Световые короба</button>
-	
-	
-		<span class = "text-interface">Тип букв</span>
-		<button class = "font checkOn" value="font1">Без засечек</button>
-		<button class = "font" value="font2">С засечками</button>
-		<button class = "font" value="font3">Декоративный</button>
-	
-	
-		<span class = "text-interface">Tип подсветки</span>
-		<button class = "typeLight checkOn" value="front">Лицевая</button><br/>
-		<button class = "typeLight" value="frontPlus">Лицевая и торец</button><br/>
-		<button class = "typeLight" value="open">Открытые светодиоды</button><br/>
-		<button class = "typeLight" value="contr">Контражур</button><br/>
-		<button class = "typeLight" value="none">Без подсветки</button>		
-	
-	
-		<span class = "text-interface">Tекст для вывески</span>   
-		<input class = "inputs" id ="mainText" type="text" value="Citygrafika"/>
-		
-		
-		<div style = "width: 100%;  margin: 0 auto; display: table;">
-		
-		
-			<div id = "sizeWrapper" style = "width: 30%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
-				<span class = "text-interface">Высота букв (см)</span>
-				<input class = "inputs" id ="size" type="text" value="50" style = "width: 80%;"/>
-				<div class = "underText">ширина надписи <span id = "width">270</span> см</div >
-			</div>
-		
-		
-			<div id = "heightWrapper" style = "width: 30%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
-				<span class = "text-interface">Глубина букв (см)</span>
-				<input class = "inputs" id = "height" type = "text" value = "10" style = "width: 80%;"/>
-			</div>	
-			
-			
-		</div>	
-
-		<span class = "text-interface">Цвет вывески</span>
-		<div style = "width: 100%;  margin: 0 auto; display: table;">
-			
-			<div id = "colorMainHtml" style = "width: 35%; min-width: 100px; float: left; margin: 0 auto; padding-left: 15%;">
-				<span class = "text-interface">Основной</span>
-				<button id ="colorMain" class = 'colorButt' style = "width: 80%; height: 25px; width: 80%; background-color: #c30000;"></button>
-			</div>
-			
-			<div id = "colorAdvHtml" style = "width: 35%;  min-width: 100px; float: right; margin: 0 auto; padding-right: 15%;">
-				<span class = "text-interface">Дополнит.</span>
-				<button id = "colorAdv" class = 'colorButt' style = "width: 80%; height: 25px; width: 80%; background-color: #ffffff;"></button>
-			</div>			
-			
-		</div>
-		
-		<div style = "margin-top: 50px; margin-bottom: 40px;">
-			<span class = "text-interface" style = "margin-top: 40px; font-size: 16px; width: 80%;">Ориентировочная <br/> стоимость изготовления:</span>
-			<div style="margin-top: 10px;">
-				<span id = "price" style = "font-size: 18px; color: #ffffff;"></span>
-				<span>&nbsp;&nbsp;&nbsp;руб.</span>
-			</div>	
-		</div>
-			
-			
-	</div>
-</div>
-<div id = 'colorPic' style = "display: none">
-	<div style = "text-align: center; width: 5%; height: 100%; float: right;">
-		<button id = "hidePallete"><img src = "maps/close.png"/></button>
-	</div>
-	<div id = 'containerColors' style = "float: left; width: 88% ">
-</div>
-
-
-<div id = 'loader' style = "position: relative; margin-left: 30%; margin-top: -70px; z-index: 100; width: 100px;">
-	<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="160px" height="20px" viewBox="0 0 128 16" xml:space="preserve"><path fill="#e399a8" d="M6.4,4.8A3.2,3.2,0,1,1,3.2,8,3.2,3.2,0,0,1,6.4,4.8Zm12.8,0A3.2,3.2,0,1,1,16,8,3.2,3.2,0,0,1,19.2,4.8ZM32,4.8A3.2,3.2,0,1,1,28.8,8,3.2,3.2,0,0,1,32,4.8Zm12.8,0A3.2,3.2,0,1,1,41.6,8,3.2,3.2,0,0,1,44.8,4.8Zm12.8,0A3.2,3.2,0,1,1,54.4,8,3.2,3.2,0,0,1,57.6,4.8Zm12.8,0A3.2,3.2,0,1,1,67.2,8,3.2,3.2,0,0,1,70.4,4.8Zm12.8,0A3.2,3.2,0,1,1,80,8,3.2,3.2,0,0,1,83.2,4.8ZM96,4.8A3.2,3.2,0,1,1,92.8,8,3.2,3.2,0,0,1,96,4.8Zm12.8,0A3.2,3.2,0,1,1,105.6,8,3.2,3.2,0,0,1,108.8,4.8Zm12.8,0A3.2,3.2,0,1,1,118.4,8,3.2,3.2,0,0,1,121.6,4.8Z"/><g transform="translate(128,16) scale(-1,-1)"><path fill="#bd0b2f" d="M-42.7,3.84A4.16,4.16,0,0,1-38.54,8a4.16,4.16,0,0,1-4.16,4.16A4.16,4.16,0,0,1-46.86,8,4.16,4.16,0,0,1-42.7,3.84Zm12.8-.64A4.8,4.8,0,0,1-25.1,8a4.8,4.8,0,0,1-4.8,4.8A4.8,4.8,0,0,1-34.7,8,4.8,4.8,0,0,1-29.9,3.2Zm12.8-.64A5.44,5.44,0,0,1-11.66,8a5.44,5.44,0,0,1-5.44,5.44A5.44,5.44,0,0,1-22.54,8,5.44,5.44,0,0,1-17.1,2.56Z"/><animateTransform attributeName="transform" type="translate" values="23 0;36 0;49 0;62 0;74.5 0;87.5 0;100 0;113 0;125.5 0;138.5 0;151.5 0;164.5 0;178 0" calcMode="discrete" dur="1170ms" repeatCount="indefinite"/></g></svg>
-</div>
-
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>	
-<script>$('#app').height( window.innerHeight );</script>
 
 
 <script src='js/libs/three.js'></script>
