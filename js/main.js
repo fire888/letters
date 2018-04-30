@@ -2,6 +2,7 @@
 'use strict'
 
 
+
 /**************************************************;
  * VARS SPACES
  **************************************************/
@@ -42,7 +43,6 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 		'fonts/Roboto_Bold.json', 
 		( response ) => {
 			s.font1 = response 	
-			//dataT.font = s.font1
 			resolve()
 		} )
 } ) ).then ( () => new Promise ( ( resolve )=> {
@@ -106,7 +106,6 @@ s.initScene = () => {
 	s.canvas = document.getElementById( 'canvas-webgl' )
 	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
 	s.renderer.setClearColor( 0x000000, 0.5 )		
-	//s.renderer.setClearColor( 0xffffff )
 	s.handleWindowResize()	
 	
 	s.renderer.gammaInput = true
@@ -140,7 +139,6 @@ s.initScene = () => {
 	s.bloomPass.radius = 0.55
 	
 	s.bloomPass.renderToScreen = true
-	//s.renderScene.renderToScreen = true;
 	
 	s.composer = new THREE.EffectComposer( s.renderer )
 	s.composer.setSize( window.innerWidth, window.innerHeight )
@@ -176,17 +174,17 @@ s.handleWindowResize = () => {
 	let h = window.innerHeight 	
 	
 	/** resize gui */
-	$('#sceneSettings').width( w * 0.26 )	
-	$('#sceneSettings').height( h )
+	$( '#sceneSettings' ).width( w * 0.26 )	
+	$( '#sceneSettings' ).height( h )
 	
 	if ( w < 1135 ) {
 		
-		$('#sizeWrapper').css( { 'width': '70%', 'float': 'none', 'padding-left': '0px' } )
-		$('#heightWrapper').css( { 'width': '70%', 'float': 'none', 'padding-right': '0px' } )		
+		$( '#sizeWrapper' ).css( { 'width': '70%', 'float': 'none', 'padding-left': '0px' } )
+		$( '#heightWrapper' ).css( { 'width': '70%', 'float': 'none', 'padding-right': '0px' } )		
 	} else {
 		
-		$('#sizeWrapper').css( { 'width': '30%', 'float': 'left', 'padding-left': '15%' } )
-		$('#heightWrapper').css( { 'width': '30%', 'float': 'right', 'padding-right': '15%'} )
+		$( '#sizeWrapper' ).css( { 'width': '30%', 'float': 'left', 'padding-left': '15%' } )
+		$( '#heightWrapper' ).css( { 'width': '30%', 'float': 'right', 'padding-right': '15%'} )
 	} 
 	
 	/** resize scene */
@@ -369,7 +367,7 @@ class Letters {
 			bevelThickness: dataT.bevelThickness,
 			bevelSize: dataT.bevelSize,
 			bevelEnabled: dataT.bevelEnabled,
-		})
+		} )
 		this.geom.computeBoundingBox()
 		this.geom.computeVertexNormals()	
 	}	
@@ -770,9 +768,13 @@ $( '.typeBoard' ).click( ( e ) => {
 	if ( dataT.typeBoard == e.target.value ) return 
 		
 	$( '.typeBoard' ).removeClass( 'checkOn' )
-	$(e.target).addClass( 'checkOn' )
+	$( e.target ).addClass( 'checkOn' )
 	
-	e.target.value == 'box' ? $( '#colorBoxSide' ).css( { 'display': 'block' } ) : $( '#colorBoxSide' ).css( { 'display': 'none' } )
+	if ( e.target.value == 'box' ) {
+		$( '#colorBoxSide' ).css( { 'display': 'block' } ) 
+	} else {
+		$( '#colorBoxSide' ).css( { 'display': 'none' } )
+	}
 	
 	dataT.typeBoard = e.target.value	
 	s.createText()
@@ -784,7 +786,7 @@ $( '.typeLight' ).click( ( e ) => {
 	if ( dataT.typeLight == e.target.value ) return
 		
 	$( '.typeLight' ).removeClass( 'checkOn' )
-	$(e.target).addClass('checkOn')	
+	$( e.target ).addClass( 'checkOn' )	
 	
 	dataT.typeLight = e.target.value 
 	s.createText()
@@ -806,12 +808,12 @@ ui.switchFont = val => {
 	}
 }
   
-$('.font').click( ( e ) => { 
+$( '.font' ).click( ( e ) => { 
 	
 	if ( dataT.font == e.target.value ) return
 	
-	$('.font').removeClass('checkOn')
-	$(e.target).addClass('checkOn')
+	$( '.font' ).removeClass( 'checkOn' )
+	$( e.target ).addClass( 'checkOn' )
 	
 	dataT.fontType = e.target.value	
 	
@@ -824,11 +826,12 @@ $('.font').click( ( e ) => {
 
 /** INPUTS ****************************************/ 
 
-ui.inputsHtml = document.getElementsByClassName('inputs')
+ui.inputsHtml = document.getElementsByClassName( 'inputs' )
 ui.inputsValues = []
 ui.inputsValuesOld = []
 
 ui.getInputsValues = () => {
+	
 	let arr = []
 	for( let i = 0; i < ui.inputsHtml.length; i ++ ){
 		arr.push( ui.inputsHtml[i].value )
@@ -902,7 +905,7 @@ ui.initPallete = () => {
 		ui.currentColorButton = e.target		
 	} )	
 	
-	$('#hidePallete').click( () => {
+	$( '#hidePallete' ).click( () => {
 			
 		$( '#colorPic' ).css( { 'display': 'none' } )
 		$( '.colorButt' ).removeClass( 'colorCheckOn' )
@@ -918,36 +921,36 @@ $( '#colorPic' ).click( ( e ) => {
 	$( ui.currentColorButton ).css( { 'backgroundColor': '#' + colors[e.target.id].hex } ) 
 	ui.orderAddColor(  ui.currentColorButton.value, colors[e.target.id].oracle )	
 	
-	if ( ui.currentColorButton.value == 'colorMain') {	
+	if ( ui.currentColorButton.value == 'colorMain' ) {	
 	
 		s.matLightMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		s.matIronMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		s.matGlow.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
-		$('#colorMainVal').html( colors[e.target.id].oracle )
+		$( '#colorMainVal' ).html( colors[e.target.id].oracle )
 	}	
 
-	if ( ui.currentColorButton.value == 'colorAdv') {	
+	if ( ui.currentColorButton.value == 'colorAdv' ) {	
 	
 		s.matLightSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
 		s.matIronSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
-		$('#colorAdvVal').html( colors[e.target.id].oracle )		
+		$( '#colorAdvVal' ).html( colors[e.target.id].oracle )		
 	}	
 	
-	if (  ui.currentColorButton.value == 'colorBoxSide') {	
+	if (  ui.currentColorButton.value == 'colorBoxSide' ) {	
 	
 		s.matLightThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
 		s.matIronThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )		
 		
-		$('#colorBoxSideSetVal').html( colors[e.target.id].oracle )		
+		$( '#colorBoxSideSetVal' ).html( colors[e.target.id].oracle )		
 	}	
 } )	
 
 
 /** INTERFACE CALLBACK CALCK PARAMS ***************/ 
  
-ui.htmlAddBoardWidth = val => $('#width').html( val )
+ui.htmlAddBoardWidth = val => $( '#width' ).html( val )
 
 
 ui.calckPrice = () => {
@@ -961,7 +964,7 @@ ui.calckPrice = () => {
 				
 	let str = String( price )  
 	str = str.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ')
-	$('#price').html( str )
+	$( '#price' ).html( str )
 
 	ui.prepearOrder( str )	
 }	
@@ -969,23 +972,23 @@ ui.calckPrice = () => {
 
 /** USER FORMS ************************************/ 
 
-$('#showUserForms').click( () => { 
+$( '#showUserForms' ).click( () => { 
 
 	$( '#formsInsertUserData' ).css( { 'display': 'block' } ) 
-	$('#containerForms').css( { 'display': 'block' } )	
-	$('#sendMessage').css( { 'display': 'none' } )
+	$( '#containerForms' ).css( { 'display': 'block' } )	
+	$( '#sendMessage' ).css( { 'display': 'none' } )
 } ) 	
 
-$('#hideUserForms').click( () => $( '#formsInsertUserData' ).css( { 'display': 'none' } ) )
+$( '#hideUserForms' ).click( () => $( '#formsInsertUserData' ).css( { 'display': 'none' } ) )
 
-$('#sendOrder').click( () => {
+$( '#sendOrder' ).click( () => {
 	
-	ui.orderAddUserData( $('mail').val(), $('phone').val(), $('name').val() )
+	ui.orderAddUserData( $( 'mail' ).val(), $( 'phone' ).val(), $( 'name' ).val() )
 	
 	if ( typeof SendOrderToServer !== 'undefined' ) SendOrderToServer()
 		
-	$('#containerForms').css( { 'display': 'none' } )	
-	$('#sendMessage').css( { 'display': 'block' } )		
+	$( '#containerForms' ).css( { 'display': 'none' } )	
+	$( '#sendMessage' ).css( { 'display': 'block' } )		
 } )
 
 
@@ -1044,7 +1047,6 @@ ui.prepearOrder = price => {
 
 ui.orderAddWidth = ( w ) => ORDER['Ширина'] = w	
 
-
 ui.orderAddColor = ( t, c ) => {
 	
 	switch ( t ) {
@@ -1067,7 +1069,7 @@ ui.orderAddUserData = ( m = 'нет', p = 'нет', n = 'нет' ) => {
 	ORDER['Имя'] = n
 
 	let  dt = []
-	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
+	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = ( new Date ).toISOString().split( /[-T:.Z]/ )
 	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]	
 }	
 
