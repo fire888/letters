@@ -952,7 +952,6 @@ $( '#colorPic' ).click( ( e ) => {
  
 ui.htmlAddBoardWidth = val => $( '#width' ).html( val )
 
-
 ui.calckPrice = () => {
 
 	let price = dataT.heightBoard * 
