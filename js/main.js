@@ -2,7 +2,6 @@
 'use strict'
 
 
-
 /**************************************************;
  * VARS SPACES
  **************************************************/
@@ -43,6 +42,7 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 		'fonts/Roboto_Bold.json', 
 		( response ) => {
 			s.font1 = response 	
+			//dataT.font = s.font1
 			resolve()
 		} )
 } ) ).then ( () => new Promise ( ( resolve )=> {
@@ -105,7 +105,7 @@ s.initScene = () => {
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' )
 	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
-	s.renderer.setClearColor( 0x000000, 0.5 )		
+	s.renderer.setClearColor( 0x000000, 0.5 )
 	s.handleWindowResize()	
 	
 	s.renderer.gammaInput = true
@@ -139,6 +139,7 @@ s.initScene = () => {
 	s.bloomPass.radius = 0.55
 	
 	s.bloomPass.renderToScreen = true
+	//s.renderScene.renderToScreen = true;
 	
 	s.composer = new THREE.EffectComposer( s.renderer )
 	s.composer.setSize( window.innerWidth, window.innerHeight )
@@ -184,7 +185,7 @@ s.handleWindowResize = () => {
 	} else {
 		
 		$( '#sizeWrapper' ).css( { 'width': '30%', 'float': 'left', 'padding-left': '15%' } )
-		$( '#heightWrapper' ).css( { 'width': '30%', 'float': 'right', 'padding-right': '15%'} )
+		$( '#heightWrapper' ).css( { 'width': '30%', 'float': 'right', 'padding-right': '15%' } )
 	} 
 	
 	/** resize scene */
@@ -367,7 +368,7 @@ class Letters {
 			bevelThickness: dataT.bevelThickness,
 			bevelSize: dataT.bevelSize,
 			bevelEnabled: dataT.bevelEnabled,
-		} )
+		})
 		this.geom.computeBoundingBox()
 		this.geom.computeVertexNormals()	
 	}	
@@ -768,13 +769,9 @@ $( '.typeBoard' ).click( ( e ) => {
 	if ( dataT.typeBoard == e.target.value ) return 
 		
 	$( '.typeBoard' ).removeClass( 'checkOn' )
-	$( e.target ).addClass( 'checkOn' )
+	$(e.target).addClass( 'checkOn' )
 	
-	if ( e.target.value == 'box' ) {
-		$( '#colorBoxSide' ).css( { 'display': 'block' } ) 
-	} else {
-		$( '#colorBoxSide' ).css( { 'display': 'none' } )
-	}
+	e.target.value == 'box' ? $( '#colorBoxSide' ).css( { 'display': 'block' } ) : $( '#colorBoxSide' ).css( { 'display': 'none' } )
 	
 	dataT.typeBoard = e.target.value	
 	s.createText()
@@ -786,7 +783,7 @@ $( '.typeLight' ).click( ( e ) => {
 	if ( dataT.typeLight == e.target.value ) return
 		
 	$( '.typeLight' ).removeClass( 'checkOn' )
-	$( e.target ).addClass( 'checkOn' )	
+	$(e.target).addClass( 'checkOn' )	
 	
 	dataT.typeLight = e.target.value 
 	s.createText()
@@ -831,7 +828,6 @@ ui.inputsValues = []
 ui.inputsValuesOld = []
 
 ui.getInputsValues = () => {
-	
 	let arr = []
 	for( let i = 0; i < ui.inputsHtml.length; i ++ ){
 		arr.push( ui.inputsHtml[i].value )
@@ -938,7 +934,7 @@ $( '#colorPic' ).click( ( e ) => {
 		$( '#colorAdvVal' ).html( colors[e.target.id].oracle )		
 	}	
 	
-	if (  ui.currentColorButton.value == 'colorBoxSide' ) {	
+	if (  ui.currentColorButton.value == 'colorBoxSide') {	
 	
 		s.matLightThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
 		s.matIronThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )		
@@ -952,6 +948,7 @@ $( '#colorPic' ).click( ( e ) => {
  
 ui.htmlAddBoardWidth = val => $( '#width' ).html( val )
 
+
 ui.calckPrice = () => {
 
 	let price = dataT.heightBoard * 
@@ -963,7 +960,7 @@ ui.calckPrice = () => {
 				
 	let str = String( price )  
 	str = str.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ')
-	$( '#price' ).html( str )
+	$('#price').html( str )
 
 	ui.prepearOrder( str )	
 }	
@@ -980,11 +977,10 @@ $( '#showUserForms' ).click( () => {
 
 $( '#hideUserForms' ).click( () => $( '#formsInsertUserData' ).css( { 'display': 'none' } ) )
 
-$( '#sendOrder' ).click( () => {
-	
-	ui.orderAddUserData( $( 'mail' ).val(), $( 'phone' ).val(), $( 'name' ).val() )
-	
-	if ( typeof SendOrderToServer !== 'undefined' ) SendOrderToServer()
+$('#sendOrder' ).click( () => {
+
+	if ( typeof SendOrderToServer !== 'undefined' ) 
+		SendOrderToServer( $( '#mail' ).val(), $( '#phone' ).val(), $( '#name' ).val() )
 		
 	$( '#containerForms' ).css( { 'display': 'none' } )	
 	$( '#sendMessage' ).css( { 'display': 'block' } )		
@@ -1061,14 +1057,4 @@ ui.orderAddColor = ( t, c ) => {
 	}
 }
 
-ui.orderAddUserData = ( m = 'нет', p = 'нет', n = 'нет' ) => {
-
-	ORDER['Почта'] = m
-	ORDER['Телефон'] = p
-	ORDER['Имя'] = n
-
-	let  dt = []
-	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = ( new Date ).toISOString().split( /[-T:.Z]/ )
-	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]	
-}	
 

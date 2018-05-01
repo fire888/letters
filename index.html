@@ -295,14 +295,20 @@ const ORDER = {
 }
 
 /** function send order */
-const SendOrderToServer = () => {
-	/** code for send order */
-	console.log(ORDER)
-}  
+const SendOrderToServer = ( m, p, n ) => {
+	
+	ORDER['Почта'] = m
+	ORDER['Телефон'] = p
+	ORDER['Имя'] = n
+	let  dt = []
+	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
+	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]
+
+	/** CODE TO SEND TO SERVER... */
+	console.log( ORDER )	
+}
 
 </script>
-
-
 
 <script src='js/libs/three.js'></script>
 <script src='js/libs/EffectComposer.js'></script>
