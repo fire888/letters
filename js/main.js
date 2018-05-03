@@ -1157,7 +1157,7 @@ $('#hideUserForms').click( () => $( '#formsInsertUserData' ).css( { 'display': '
 
 $('#sendOrder').click( () => {
 	
-	ui.orderAddUserData( $('#mail').val(), $('#phone').val(), $('#name').val() )
+	SetForms( $('#mail').val(), $('#phone').val(), $('#name').val() )
 	
 	if ( typeof SendOrderToServer !== 'undefined' ) SendOrderToServer()
 		
@@ -1237,14 +1237,4 @@ ui.orderAddColor = ( t, c ) => {
 	}
 }
 
-ui.orderAddUserData = ( m = 'нет', p = 'нет', n = 'нет' ) => {
-
-	ORDER['Почта'] = m
-	ORDER['Телефон'] = p
-	ORDER['Имя'] = n
-
-	let  dt = []
-	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
-	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]	
-}	
 

@@ -318,11 +318,20 @@ const ORDER = {
 }
 
 /** function send order */
-const SendOrderToServer = () => {
-	/** code for send order */
-	console.log(ORDER)
-}  
+const SetForms = ( m = 'нет', p = 'нет', n = 'нет' ) => {
 
+	ORDER['Почта'] = m
+	ORDER['Телефон'] = p
+	ORDER['Имя'] = n
+
+	let  dt = []
+	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
+	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]	
+	
+	//* send........ */
+	console.log( ORDER )	
+}
+	
 </script>
 
 
