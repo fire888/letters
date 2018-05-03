@@ -44,23 +44,22 @@ const loadAssets = () => new Promise ( ( resolve ) => {
 		'fonts/Roboto_Bold.json', 
 		( response ) => {
 			s.font1 = response 	
-			//dataT.font = s.font1
 			resolve()
 		} )
 } ) ).then ( () => new Promise( ( resolve ) => { 
 
-		s.textureCube = new THREE.CubeTextureLoader()
-			.setPath( 'maps/')
-			.load([ 
-				'negx.jpg',
-				'negz.jpg', 
-				'negy.jpg', 
-				'posz.jpg', 
-				'posx.jpg', 
-				'posy.jpg' 
-			],()=> {
-				resolve();				
-			})	
+	s.textureCube = new THREE.CubeTextureLoader()
+		.setPath( 'maps/')
+		.load([ 
+			'negx.jpg',
+			'negz.jpg', 
+			'negy.jpg', 
+			'posz.jpg', 
+			'posx.jpg', 
+			'posy.jpg' 
+		],()=> {
+			resolve()				
+		})	
 } ) ).then ( () => new Promise ( ( resolve )=> {
 	
 	s.fontLoader.load( 
@@ -80,19 +79,30 @@ const loadAssets = () => new Promise ( ( resolve ) => {
 } ) ).then ( () => {
 	
 	if ( typeof params === 'undefined' ) { 
-		ui.switchFont( 'font1' ) 
+	
+		ui.switchFont( 'font1' )
+		
 	} else { 
+	
 		ui.switchFont( params.fontType ) 
+		
 	}
 	
 	if ( typeof params !== 'undefined' ) {
+		
 		if ( ! params.colorLettersFront || ! params.colorLettersSide || ! params.colorBoxSide ) { 
+		
 			s.initMaterials() 
+			
 		} else {	
-			s.initMaterials( params.colorLettersFront.hex, params.colorLettersSide.hex, params.colorBoxSide.hex )		
+		
+			s.initMaterials( params.colorLettersFront.hex, params.colorLettersSide.hex, params.colorBoxSide.hex )
+			
 		}
 	} else {
-		s.initMaterials() 	
+		
+		s.initMaterials()
+		
 	}
 			
 	s.initScene()	                     
@@ -124,7 +134,6 @@ s.initScene = () => {
 		10,	( window.innerWidth * 0.74 ) / 800, 3.5, 25000 )
 	s.cameraB.position.set( 0, 0, 1700 )	
 	s.cameraB.lookAt( s.sceneB.position )
-	
 	
 	s.rendererB = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
 	
@@ -188,18 +197,20 @@ const addBackImgToScene = () => {
 		s.sceneB.remove( s.backgroundImagePlane )		
 	}
 	
-	let imageElement = document.getElementById('upload-img');
+	let imageElement = document.getElementById('upload-img')
+	
 	imageElement.onload = function( e ) {
-		let texture = new THREE.Texture( this );
-		texture.needsUpdate = true;
-		let w = 5500;
-		console.log(this.height); 
-		let h = this.height/this.width * w;
-		s.planeGeom = new THREE.PlaneGeometry( w, h );
-		s.backMat = new THREE.MeshBasicMaterial( {map: texture});
-		s.backgroundImagePlane = new THREE.Mesh( s.planeGeom, s.backMat );
+		
+		let texture = new THREE.Texture( this )
+		texture.needsUpdate = true
+		let w = 5500
+		console.log(this.height);
+		let h = this.height/this.width * w
+		s.planeGeom = new THREE.PlaneGeometry( w, h )
+		s.backMat = new THREE.MeshBasicMaterial( { map: texture } )
+		s.backgroundImagePlane = new THREE.Mesh( s.planeGeom, s.backMat )
 		s.backgroundImagePlane.position.set( 0, 0, -20000 )		
-		s.sceneB.add(s.backgroundImagePlane);
+		s.sceneB.add(s.backgroundImagePlane)
 		s.backgroundImagePlane.lookAt( s.cameraB.position )
 		s.isBackgroundTexture = true	
 	}
@@ -279,12 +290,6 @@ s.setColorRenderer = ( v = '000000' ) => {
 }
 
 
-/** ADD IMAGE TO BACK PLANE ***********************/
-
-s.addBackImage = img => {
-
-	console.log('!')
-}	
 
 /**************************************************;
  * MATERIALS / SHADERS
