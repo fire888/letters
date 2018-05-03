@@ -2,6 +2,7 @@
 'use strict'
 
 
+
 /**************************************************;
  * VARS SPACES
  **************************************************/
@@ -10,6 +11,7 @@ const ui = {}
  
 const s = {
 	
+	isBackgroundTexture: false,
 	textureLoader: new THREE.TextureLoader(),
 	fontLoader: new THREE.FontLoader()
 }
@@ -20,13 +22,13 @@ const s = {
  * LOAD ASSETS
  **************************************************/
  
-const loadAssets = () => new Promise ( ( resolve )=> {
+const loadAssets = () => new Promise ( ( resolve ) => {
 					
 	s.mapGlow = s.textureLoader.load( 
 		'maps/map-glow.png',
 		() => resolve()			
 	)			
-} ).then( () => new Promise ( ( resolve )=> {
+} ).then( () => new Promise ( ( resolve ) => {
 	
 	s.mapDiod = s.textureLoader.load( 
 		'maps/map-diod.png',
@@ -36,7 +38,7 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 			resolve()
 		}		
 	)			
-} ) ).then( () => new Promise ( ( resolve )=> {
+} ) ).then( () => new Promise ( ( resolve ) => {
 	
 	s.fontLoader.load( 
 		'fonts/Roboto_Bold.json', 
@@ -45,6 +47,20 @@ const loadAssets = () => new Promise ( ( resolve )=> {
 			//dataT.font = s.font1
 			resolve()
 		} )
+} ) ).then ( () => new Promise( ( resolve ) => { 
+
+		s.textureCube = new THREE.CubeTextureLoader()
+			.setPath( 'maps/')
+			.load([ 
+				'negx.jpg',
+				'negz.jpg', 
+				'negy.jpg', 
+				'posz.jpg', 
+				'posx.jpg', 
+				'posy.jpg' 
+			],()=> {
+				resolve();				
+			})	
 } ) ).then ( () => new Promise ( ( resolve )=> {
 	
 	s.fontLoader.load( 
@@ -102,19 +118,29 @@ s.initScene = () => {
 		10,	( window.innerWidth * 0.74 ) / 800, 3.5, 15000 )
 	s.camera.position.set( -400, 400, 1700 )
 	
+	/** SCENE B FOR BACKGROUND */
+	s.sceneB = new THREE.Scene()
+	s.cameraB = new THREE.PerspectiveCamera( 
+		10,	( window.innerWidth * 0.74 ) / 800, 3.5, 25000 )
+	s.cameraB.position.set( 0, 0, 1700 )	
+	s.cameraB.lookAt( s.sceneB.position )
+	
+	
+	s.rendererB = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
+	
 	/** RENDERER */
 	s.canvas = document.getElementById( 'canvas-webgl' )
 	s.renderer = new THREE.WebGLRenderer( { canvas: s.canvas, alpha: true } )
-	s.renderer.setClearColor( 0x000000, 0.5 )
+	s.renderer.setClearColor( 0x000000, 0.5 )		
 	s.handleWindowResize()	
 	
 	s.renderer.gammaInput = true
 	s.renderer.gammaOutput = true			
 		
-	/** LIGHTS */
-	let pointL = new THREE.PointLight( 0xffffff, 1.0 )
-	pointL.position.set( 200, 300, 600 )
-	s.scene.add( pointL )
+	/** LIGHTS */	
+	s.pointL = new THREE.PointLight( 0xffffff, 0.2 )
+	s.pointL.position.set( 200, 300, 600 )
+	s.scene.add( s.pointL )
 	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 )
 	s.scene.add(lightAmb)
 		
@@ -125,9 +151,10 @@ s.initScene = () => {
 	/** GlOW PLANE */
 	s.geomGlow = new THREE.PlaneGeometry( 10, 10 ) 
 	s.glowPlane = new THREE.Mesh( s.geomGlow, s.matGlow )
-	s.scene.add( s.glowPlane )
+	s.scene.add( s.glowPlane )	
 				
 	/** COMPOSER */
+	s.renderSceneB = new THREE.RenderPass( s.sceneB, s.cameraB )	
 	s.renderScene = new THREE.RenderPass( s.scene, s.camera )
 	
 	s.effectFXAA = new THREE.ShaderPass( THREE.FXAAShader )
@@ -139,10 +166,10 @@ s.initScene = () => {
 	s.bloomPass.radius = 0.55
 	
 	s.bloomPass.renderToScreen = true
-	//s.renderScene.renderToScreen = true;
 	
 	s.composer = new THREE.EffectComposer( s.renderer )
 	s.composer.setSize( window.innerWidth, window.innerHeight )
+	
 	s.composer.addPass( s.renderScene )
 	s.composer.addPass( s.effectFXAA )
 	s.composer.addPass( s.bloomPass )
@@ -153,12 +180,46 @@ s.initScene = () => {
 }
 
 
+/** LOADER BACKGROUND TEXTURE */
+ 
+const addBackImgToScene = () => {
+	
+	if ( s.backgroundImagePlane ) {
+		s.sceneB.remove( s.backgroundImagePlane )		
+	}
+	
+	let imageElement = document.getElementById('upload-img');
+	imageElement.onload = function( e ) {
+		let texture = new THREE.Texture( this );
+		texture.needsUpdate = true;
+		let w = 5500;
+		console.log(this.height); 
+		let h = this.height/this.width * w;
+		s.planeGeom = new THREE.PlaneGeometry( w, h );
+		s.backMat = new THREE.MeshBasicMaterial( {map: texture});
+		s.backgroundImagePlane = new THREE.Mesh( s.planeGeom, s.backMat );
+		s.backgroundImagePlane.position.set( 0, 0, -20000 )		
+		s.sceneB.add(s.backgroundImagePlane);
+		s.backgroundImagePlane.lookAt( s.cameraB.position )
+		s.isBackgroundTexture = true	
+	}
+}
+
+
 /** ANIMATION SCENE *******************************/
   
 s.animate = () => {
 		
 	s.controls.update()			
-	s.composer.render()
+    
+	if ( s.isBackgroundTexture ) {
+		s.renderer.autoClear = false;
+		s.renderer.clear();	
+		s.renderer.render( s.sceneB, s.cameraB )
+		s.renderer.render( s.scene, s.camera )	
+	} else {	
+		s.composer.render()	
+	}
 	
 	requestAnimationFrame( s.animate )	
 }
@@ -175,29 +236,55 @@ s.handleWindowResize = () => {
 	let h = window.innerHeight 	
 	
 	/** resize gui */
-	$( '#sceneSettings' ).width( w * 0.26 )	
-	$( '#sceneSettings' ).height( h )
+	$('#sceneSettings').width( w * 0.26 )	
+	$('#sceneSettings').height( h )
 	
 	if ( w < 1135 ) {
 		
-		$( '#sizeWrapper' ).css( { 'width': '70%', 'float': 'none', 'padding-left': '0px' } )
-		$( '#heightWrapper' ).css( { 'width': '70%', 'float': 'none', 'padding-right': '0px' } )		
+		$('#sizeWrapper').css( { 'width': '70%', 'float': 'none', 'padding-left': '0px' } )
+		$('#heightWrapper').css( { 'width': '70%', 'float': 'none', 'padding-right': '0px' } )		
 	} else {
 		
-		$( '#sizeWrapper' ).css( { 'width': '30%', 'float': 'left', 'padding-left': '15%' } )
-		$( '#heightWrapper' ).css( { 'width': '30%', 'float': 'right', 'padding-right': '15%' } )
+		$('#sizeWrapper').css( { 'width': '30%', 'float': 'left', 'padding-left': '15%' } )
+		$('#heightWrapper').css( { 'width': '30%', 'float': 'right', 'padding-right': '15%'} )
 	} 
 	
 	/** resize scene */
 	s.renderer.setPixelRatio( w * 0.74 / h )	
 	s.renderer.setSize( Math.floor( w * 0.74 ), h )	
+	
 	s.camera.aspect =  w * 0.74 / h
-	s.camera.updateProjectionMatrix()	
+	s.camera.updateProjectionMatrix()
+	
+	s.cameraB.aspect =  w * 0.74 / h
+	s.cameraB.updateProjectionMatrix()		
 }
 
 window.addEventListener( 'resize', s.handleWindowResize, false )
 
 
+/** SWITCH RENDERER COLOR *************************/
+
+s.setColorRenderer = ( v = '000000' ) => {
+	
+	s.renderer.setClearColor( eval( '0x' + v ), 1.0 )	
+	
+	if ( v ==  '000000' ) {
+		s.renderScene.renderToScreen = false
+		s.bloomPass.renderToScreen = true
+	} else {
+		s.bloomPass.renderToScreen = false
+		s.renderScene.renderToScreen = true
+	}
+}
+
+
+/** ADD IMAGE TO BACK PLANE ***********************/
+
+s.addBackImage = img => {
+
+	console.log('!')
+}	
 
 /**************************************************;
  * MATERIALS / SHADERS
@@ -210,16 +297,24 @@ s.initMaterials = ( c1 = 'ff0000', c2 = 'ffffff', c3 = 'ff0000' ) => {
 	let cs3 = '0x' + c3	
 	
 	/** LIGHT MATERIALS */
-	s.matLightMain = new THREE.MeshBasicMaterial( { 
+	s.matLightMain = new THREE.MeshPhongMaterial( { 		
+		
 		color: eval( cs1 ),
-		flatShading: true		
+		emissive: eval( cs1 ),
+
+		transparent: true,
+		flatShading: true,
+		side: THREE.DoubleSide,
+		
 	} )
 	
 	s.matLightSecond = s.matLightMain.clone()
 	s.matLightSecond.color.setHex( eval( cs2 ) )
+	s.matLightSecond.emissive.setHex( eval( cs2 ) )	
 
 	s.matLightThird = s.matLightMain.clone()
 	s.matLightThird.color.setHex( eval( cs3 ) )	
+	s.matLightThird.emissive.setHex( eval( cs3 ) )	
 			
 	s.matDiod = new THREE.ShaderMaterial( s.DiodShader )
 	s.matDiod.uniforms.tDiff.value = s.mapDiod  	
@@ -236,14 +331,13 @@ s.initMaterials = ( c1 = 'ff0000', c2 = 'ffffff', c3 = 'ff0000' ) => {
 	
 	/** EASY MATERIALS */
 	s.matIronMain = new THREE.MeshPhongMaterial( { 
-		color: 0x111b1a,
-		emissive: 0x070707,
-		specular: eval( cs1 ),
+		envMap: s.textureCube,
+		reflectivity: 0.1,		
+		color: eval( cs1 ),
 		shininess: 0.1,				
 		reflectivity: 0.2,
-		transparent: true,
 		flatShading: true,
-		side: THREE.DoubleSide 		
+		side: THREE.DoubleSide	 		
 	})
 	
 	s.matIronSecond = s.matIronMain.clone()	
@@ -258,7 +352,19 @@ s.DiodShader = {
 		tDiff: { 
 			type: 't',
 			value: null 
-		}
+		},
+		tRed: {
+			type: 'f',
+			value: 1.0 		
+		},
+		tGreen: {
+			type: 'f',
+			value: 0.0 		
+		},
+		tBlue: {
+			type: 'f',
+			value: 0.0 		
+		}		
 	},
 	vertexShader: [
 		'varying vec2 vUv;',
@@ -269,11 +375,15 @@ s.DiodShader = {
 	].join( '\n' ),
 	fragmentShader: [
 		'varying vec2 vUv;',
-		'uniform sampler2D tDiff;',	
+		'uniform sampler2D tDiff;',
+		'uniform float tRed;',
+		'uniform float tGreen;',
+		'uniform float tBlue;',		
 		'void main() {',
 			'vec2 uv = vUv*0.2;',	
 			'vec4 diff = texture2D( tDiff, uv );',
-			'gl_FragColor = diff;',
+			'vec4 outputing = diff * vec4( tRed, tGreen, tBlue, 1.0 ) * 1.1 + 0.1;',
+			'gl_FragColor = outputing;',
 		'}'
 	].join( '\n' )
 }
@@ -338,12 +448,12 @@ class Letters {
 	constructor () {
 
 		this.setHeight() 
-		this.setBlummPass()	
 		this.createGeom() 		
 		this.setMaterrials()  
 		this.createMesh()
 		this.sendWidth()	
 		this.setGlow()
+		this.setBlummPass()			
 	}
 	
 	setHeight() {
@@ -368,9 +478,10 @@ class Letters {
 			bevelThickness: dataT.bevelThickness,
 			bevelSize: dataT.bevelSize,
 			bevelEnabled: dataT.bevelEnabled,
-		})
+		} )
 		this.geom.computeBoundingBox()
-		this.geom.computeVertexNormals()	
+		this.geom.computeVertexNormals()
+		this.geom.computeFaceNormals()	
 	}	
 	
 	setMaterrials() {
@@ -439,7 +550,7 @@ class LettersOpen extends Letters {
 		this.mat = [ s.matDiod, s.matIronSecond ]
 	}
 	
-	setGlow() {	
+	/*setGlow() {	
 		
 		s.glowPlane.visible = true
 		s.matGlow.opacity = 0.3
@@ -447,7 +558,7 @@ class LettersOpen extends Letters {
 		s.glowPlane.position.x = 0	
 		s.glowPlane.position.z = this.geom.boundingBox.max.z + 3  
 		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 	
-	}
+	}*/
 
 	remove() {
 		
@@ -477,12 +588,6 @@ class LettersContr extends Letters {
 			bevelEnabled: dataT.bevelEnabled
 		} ) 
 	}
-	
-	setBlummPass() {
-		
-		s.bloomPass.threshold = 0.21		
-		s.bloomPass.strength = 5.0			
-	}
 
 	setMaterrials() {
 		
@@ -500,14 +605,14 @@ class LettersContr extends Letters {
 		s.scene.add( this.meshLight )
 	}	
 
-	setGlow() {
+	/*setGlow() {
 		
 		s.glowPlane.visible = true
 		s.matGlow.opacity = 0.2
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.18, 1 )
 		s.glowPlane.position.z = 0  
 		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 
-	}
+	}*/
 
 	remove() {
 		
@@ -572,7 +677,7 @@ class CorobLetters extends Letters {
 
 	setMaterrials() {
 		
-		this.mat = [ s.matIronMain, s.matIronMain ]
+		this.mat = [ s.matLightMain, s.matIronMain ]
 	}	
 
 	setCorobMat() {
@@ -616,11 +721,11 @@ class CorobLettersPlus extends CorobLetters {
  
 class CorobLettersOpen extends CorobLetters {
 	
-	setBlummPass() {
+	//setBlummPass() {
 		
-		s.bloomPass.threshold = 0.21		
-		s.bloomPass.strength = 5.2			
-	}	
+	//	s.bloomPass.threshold = 0.21		
+	//	s.bloomPass.strength = 5.2			
+	//}	
 	
 	setMaterrials() {
 		
@@ -639,14 +744,14 @@ class CorobLettersOpen extends CorobLetters {
 		this.matCorob = [ s.matIronThird, s.matIronThird, s.matIronThird,  s.matIronThird, s.matIronSecond, s.matIronSecond ]
 	}	
 	
-	setGlow() {
+	/*setGlow() {
 		
 		s.glowPlane.visible = true
 		s.matGlow.opacity = 0.2
 		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.18, 1 )
 		s.glowPlane.position.z = 2  
 		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 
-	}		
+	}*/		
 }
 
 
@@ -662,7 +767,7 @@ class CorobLettersContr extends CorobLetters {
 
 	setMaterrials() {
 		
-		this.mat = [ s.matLightMain, s.matLightMain ]
+		this.mat = [ s.matIronMain, s.matIronMain ]
 	}	
 	
 	setCorobMat() {
@@ -759,7 +864,7 @@ s.createText = () => {
  * INIT INTERFACE 
  **************************************************/
 
-ui.loaderIcon = document.getElementById('loader')  
+ui.loaderIcon = document.getElementById('preloaderImg')  
  
 
 /** BUTTONS ***************************************/ 
@@ -783,7 +888,7 @@ $( '.typeLight' ).click( ( e ) => {
 	if ( dataT.typeLight == e.target.value ) return
 		
 	$( '.typeLight' ).removeClass( 'checkOn' )
-	$(e.target).addClass( 'checkOn' )	
+	$( e.target ).addClass( 'checkOn' )	
 	
 	dataT.typeLight = e.target.value 
 	s.createText()
@@ -901,13 +1006,28 @@ ui.initPallete = () => {
 		ui.currentColorButton = e.target		
 	} )	
 	
-	$( '#hidePallete' ).click( () => {
+	$('#hidePallete').click( () => {
 			
 		$( '#colorPic' ).css( { 'display': 'none' } )
 		$( '.colorButt' ).removeClass( 'colorCheckOn' )
 		
 		ui.currentColorButton = 'none'		
 	} )	
+}
+
+const hexToRgb = ( hex ) => {
+
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+    } : null;
 }
 
 $( '#colorPic' ).click( ( e ) => {
@@ -917,36 +1037,69 @@ $( '#colorPic' ).click( ( e ) => {
 	$( ui.currentColorButton ).css( { 'backgroundColor': '#' + colors[e.target.id].hex } ) 
 	ui.orderAddColor(  ui.currentColorButton.value, colors[e.target.id].oracle )	
 	
-	if ( ui.currentColorButton.value == 'colorMain' ) {	
+	if ( ui.currentColorButton.value == 'colorMain') {	
 	
 		s.matLightMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
-		s.matIronMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
+		s.matLightMain.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
 		s.matGlow.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
-		$( '#colorMainVal' ).html( colors[e.target.id].oracle )
+		let colorShader = ( hexToRgb( colors[e.target.id].hex ) )
+		s.matDiod.uniforms.tRed.value = colorShader.r 
+		s.matDiod.uniforms.tGreen.value = colorShader.g 		
+		s.matDiod.uniforms.tBlue.value = colorShader.b 			
+		
+		s.matIronMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
+		
+		$('#colorMainVal').html( colors[e.target.id].oracle )
 	}	
 
-	if ( ui.currentColorButton.value == 'colorAdv' ) {	
+	if ( ui.currentColorButton.value == 'colorAdv') {	
 	
 		s.matLightSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
+		s.matLightSecond.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
+			
+		
 		s.matIronSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
-		$( '#colorAdvVal' ).html( colors[e.target.id].oracle )		
+		$('#colorAdvVal').html( colors[e.target.id].oracle )		
 	}	
 	
 	if (  ui.currentColorButton.value == 'colorBoxSide') {	
 	
-		s.matLightThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
+		s.matLightThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
+		s.matLightThird.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
+		
 		s.matIronThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )		
 		
-		$( '#colorBoxSideSetVal' ).html( colors[e.target.id].oracle )		
-	}	
-} )	
+		$('#colorBoxSideSetVal').html( colors[e.target.id].oracle )		
+	}
+
+	s.createText()	
+} )
+
+
+/** UI PARAMS *************************************/
+
+$( '.switchDay' ).click( ( e ) => {
+	
+	$( '.switchDay' ).removeClass( 'checkOnPM' ) 	
+	$( e.target ).addClass( 'checkOnPM' )
+	
+	if ( e.target.value == '000000' ) {
+		$( '#sceneSettings' ).removeClass( 'day' ) 
+		$( '#app' ).removeClass( 'day' ) 		
+	} else {
+		$( '#sceneSettings' ).addClass( 'day' )
+		$( '#app' ).addClass( 'day' )
+	}
+	
+	s.setColorRenderer( e.target.value )
+} )
 
 
 /** INTERFACE CALLBACK CALCK PARAMS ***************/ 
  
-ui.htmlAddBoardWidth = val => $( '#width' ).html( val )
+ui.htmlAddBoardWidth = val => $('#width').html( val )
 
 
 ui.calckPrice = () => {
@@ -963,27 +1116,48 @@ ui.calckPrice = () => {
 	$('#price').html( str )
 
 	ui.prepearOrder( str )	
-}	
+}
+
+let fileupload  = $( '#fileupload' )
+let buttonFileUpload = $( '#btnupload' )
+buttonFileUpload.click( () => { fileupload.click(); console.log('!s') } )
+  
+let imgOnLoad = false; 
+function readURL( e ) {
+	console.log('!!!')
+	if ( this.files && this.files[0] ) {
+		var reader = new FileReader();
+		$( reader ).load( function( e ) { 
+			$( '#upload-img' ).attr( 'src' , e.target.result );
+			addBackImgToScene()	
+			imgOnLoad = true;
+		} );
+		reader.readAsDataURL( this.files[0] );	
+	}
+}
+fileupload.change( readURL );
+
 
 
 /** USER FORMS ************************************/ 
 
-$( '#showUserForms' ).click( () => { 
+$('#showUserForms').click( () => { 
 
 	$( '#formsInsertUserData' ).css( { 'display': 'block' } ) 
-	$( '#containerForms' ).css( { 'display': 'block' } )	
-	$( '#sendMessage' ).css( { 'display': 'none' } )
+	$('#containerForms').css( { 'display': 'block' } )	
+	$('#sendMessage').css( { 'display': 'none' } )
 } ) 	
 
-$( '#hideUserForms' ).click( () => $( '#formsInsertUserData' ).css( { 'display': 'none' } ) )
+$('#hideUserForms').click( () => $( '#formsInsertUserData' ).css( { 'display': 'none' } ) )
 
-$('#sendOrder' ).click( () => {
-
-	if ( typeof SendOrderToServer !== 'undefined' ) 
-		SendOrderToServer( $( '#mail' ).val(), $( '#phone' ).val(), $( '#name' ).val() )
+$('#sendOrder').click( () => {
+	
+	ui.orderAddUserData( $('#mail').val(), $('#phone').val(), $('#name').val() )
+	
+	if ( typeof SendOrderToServer !== 'undefined' ) SendOrderToServer()
 		
-	$( '#containerForms' ).css( { 'display': 'none' } )	
-	$( '#sendMessage' ).css( { 'display': 'block' } )		
+	$('#containerForms').css( { 'display': 'none' } )	
+	$('#sendMessage').css( { 'display': 'block' } )		
 } )
 
 
@@ -1042,6 +1216,7 @@ ui.prepearOrder = price => {
 
 ui.orderAddWidth = ( w ) => ORDER['Ширина'] = w	
 
+
 ui.orderAddColor = ( t, c ) => {
 	
 	switch ( t ) {
@@ -1057,4 +1232,14 @@ ui.orderAddColor = ( t, c ) => {
 	}
 }
 
+ui.orderAddUserData = ( m = 'нет', p = 'нет', n = 'нет' ) => {
+
+	ORDER['Почта'] = m
+	ORDER['Телефон'] = p
+	ORDER['Имя'] = n
+
+	let  dt = []
+	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
+	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]	
+}	
 

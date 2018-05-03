@@ -7,22 +7,25 @@
 <body>
 
 
-<!--- APPLICATION UI ------> 
+<!-- APPLICATION   --> 
 
-<div id="app" style="display: block; width: 100%; height: 100%; overflow: hidden; background-color: #000000;" >
+<div id="app">
 
-	<canvas id="canvas-webgl" class="p-canvas-webgl" style = "float: left;"></canvas>	
-	<div id = "sceneSettings" style = "position: absolute; right: 0px; width: 26%; height: 100%; z-index: 200; text-align: center; background-color: #002432;" >
+	<canvas id="canvas-webgl" class="p-canvas-webgl" style = "float: left;"></canvas>
+	
+	
+	<!-- RIGHT SETTINGS -->	
+	<div id = "sceneSettings">
 		
-		
+		 	
 		<span class = "text-interface">Тип вывески</span>	
 		<button class = "typeBoard checkOn" value = "letters">Объемные буквы</button>
 		<button class = "typeBoard" value = "box">Световые короба</button>
 	
 	
 		<span class = "text-interface">Тип букв</span>
-		<button class = "font checkOn" value="font1">Без засечек</button>
-		<button class = "font" value="font2">С засечками</button>
+		<button class = "font" value="font1">Без засечек</button>
+		<button class = "font checkOn" value="font2">С засечками</button>
 		<button class = "font" value="font3">Декоративный</button>
 	
 	
@@ -80,44 +83,64 @@
 			
 		<button id = "showUserForms" class ='checkOn' style = 'width: 70%; height: 30px; font-size: 16px'>Сделать запрос</button>			
 	</div>
-</div>
-
-<div id = 'colorPic' style = "display: none">
-	<div style = "text-align: center; width: 5%; height: 100%; float: right;">
-		<button id = "hidePallete"><img src = "maps/close.png"/></button>
+	
+	
+	<!-- PALLETES -->
+	<div id = 'colorPic' style = "display: none">
+		<div style = "text-align: center; width: 5%; height: 100%; float: right;">
+			<button id = "hidePallete"><img src = "maps/close.png"/></button>
+		</div>
+		<div id = 'containerColors' style = "float: left; width: 88% "></div>
 	</div>
-	<div id = 'containerColors' style = "float: left; width: 88% "></div>
-</div>
 
-<div id = 'formsInsertUserData' style = 'display: none;'>
-	<div style = " width: 5%; height: 100%; float: right;">
-		<button id = "hideUserForms"><img src = "maps/close.png"/></button>
+	<div id = 'formsInsertUserData' style = 'display: none;'>
+		<div style = " width: 5%; height: 100%; float: right;">
+			<button id = "hideUserForms"><img src = "maps/close.png"/></button>
+		</div>
+		<div id = 'containerForms' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%">
+			<div class = 'userFormText'>Наши менеджеры обработают Ваш запрос и перезвонят Вам.<br/> Пожалуйста, оставьте Ваши контактные данные.</div><br/>
+			<input class = "userForm" id ="mail" type="text" value="" style="margin-top: 5%"/>
+			<span class = 'userFormText'>Почта</span><br/><br/>
+			<input class = "userForm" id ="phone" type="text" value=""/>
+			<span class = 'userFormText'>Телефон</span><br/><br/>	
+			<input class = "userForm" id ="name" type="text" value=""/>
+			<span class = 'userFormText'>Как к Вам обратиться</span><br/><br/><br/>		
+			<button id = "sendOrder" class ='checkOn' style = 'width: 33.5%; height: 30px; font-size: 16px; margin-left: 15px; margin-bottom: 30px'>Отправка</button>	
+		</div>	
+		<div id = 'sendMessage' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%; display: none">
+			<div class = 'userFormText'>Запрос отпрален</div><br/>	
+		</div>	
+		
 	</div>
-	<div id = 'containerForms' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%">
-		<div class = 'userFormText'>Наши менеджеры обработают Ваш запрос и перезвонят Вам.<br/> Пожалуйста, оставьте Ваши контактные данные.</div><br/>
-		<input class = "userForm" id ="mail" type="text" value="" style="margin-top: 5%"/>
-		<span class = 'userFormText'>Почта</span><br/><br/>
-		<input class = "userForm" id ="phone" type="text" value=""/>
-		<span class = 'userFormText'>Телефон</span><br/><br/>	
-		<input class = "userForm" id ="name" type="text" value=""/>
-		<span class = 'userFormText'>Как к Вам обратиться</span><br/><br/><br/>		
-		<button id = "sendOrder" class ='checkOn' style = 'width: 33.5%; height: 30px; font-size: 16px; margin-left: 15px; margin-bottom: 30px'>Отправка</button>	
-	</div>	
-	<div id = 'sendMessage' style = "margin: 0 auto; width: 60%; text-align: left; margin-top: 2%; display: none">
-		<div class = 'userFormText'>Запрос отпрален</div><br/>	
-	</div>	
+
+	
+	
+	<!-- DAY / NIGHT BUTTONS -->
+	<div style = 'position: absolute; left: 20px; bottom: 100px; width: 40px; text-align: center;'>
+		<button id = 'day' class = 'switchDay' value = 'ffffff'  >&#9728;</button>
+		<button id = 'night' class = 'switchDay checkOnPM' value = '000000'>&#9790;</button>		
+	</div>
+	
+	<div style = 'position: absolute; bottom: 30px; left: 30px;'>
+		Вы можете загрузить изображение Вашего фасада и примерить вывеску&nbsp;
+		<input type = 'button' id = 'btnupload' style = 'width: 200px; padding: 5px 40px 5px 40px; display: inline; cursor: pointer;' value = 'Загрузить фото'/>
+		<input type = 'file' id = "fileupload"/ style = 'display: none;'>
+		<img src="#" id="upload-img" alt="image" style = 'display: none;'/>			
+	</div>
+	
+	
+	
+	<img id = 'preloaderImg' src = 'maps/loading.gif' style = 'position: absolute; bottom: 200px; left: 35%; z-index: 4000;' >
+
 	
 </div>
 
+<img src="#" id="upload-img" alt="image" style = 'position: absolute; left: 0px  height: 300px; z-index: 5000;'/>	
 
-<div id = 'loader' style = "position: relative; margin-top: -300px; z-index: 1000; width: 76%; text-align: center;">
-	<img src = 'maps/loading.gif'>
-</div>
-
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>	
+<script type="text/javascript" src="js/libs/jquery-3.2.1.js"></script>	
 <script>$('#app').height( window.innerHeight );</script>
 
-<!--- END APPLICATION UI --->
+<!-- END APPLICATION -->
 
 
 
@@ -295,20 +318,14 @@ const ORDER = {
 }
 
 /** function send order */
-const SendOrderToServer = ( m, p, n ) => {
-	
-	ORDER['Почта'] = m
-	ORDER['Телефон'] = p
-	ORDER['Имя'] = n
-	let  dt = []
-	let d = [dt.y, dt.m, dt.d, dt.h, dt.i, dt.s] = (new Date).toISOString().split(/[-T:.Z]/)
-	ORDER['Дата'] = d[2] + ' : ' + d[1] + ' : ' + d[0]
-
-	/** CODE TO SEND TO SERVER... */
-	console.log( ORDER )	
-}
+const SendOrderToServer = () => {
+	/** code for send order */
+	console.log(ORDER)
+}  
 
 </script>
+
+
 
 <script src='js/libs/three.js'></script>
 <script src='js/libs/EffectComposer.js'></script>
