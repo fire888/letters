@@ -21,14 +21,8 @@ const s = {
 /**************************************************;
  * LOAD ASSETS
  **************************************************/
- 
-const loadAssets = () => new Promise ( ( resolve ) => {
-					
-	s.mapGlow = s.textureLoader.load( 
-		'maps/map-glow.png',
-		() => resolve()			
-	)			
-} ).then( () => new Promise ( ( resolve ) => {
+ 			
+const loadAssets = () =>  new Promise ( ( resolve ) => {
 	
 	s.mapDiod = s.textureLoader.load( 
 		'maps/map-diod.png',
@@ -38,7 +32,7 @@ const loadAssets = () => new Promise ( ( resolve ) => {
 			resolve()
 		}		
 	)			
-} ) ).then( () => new Promise ( ( resolve ) => {
+} ).then( () => new Promise ( ( resolve ) => {
 	
 	s.fontLoader.load( 
 		'fonts/Roboto_Bold.json', 
@@ -79,30 +73,19 @@ const loadAssets = () => new Promise ( ( resolve ) => {
 } ) ).then ( () => {
 	
 	if ( typeof params === 'undefined' ) { 
-	
 		ui.switchFont( 'font1' )
-		
 	} else { 
-	
 		ui.switchFont( params.fontType ) 
-		
 	}
 	
 	if ( typeof params !== 'undefined' ) {
-		
 		if ( ! params.colorLettersFront || ! params.colorLettersSide || ! params.colorBoxSide ) { 
-		
 			s.initMaterials() 
-			
 		} else {	
-		
 			s.initMaterials( params.colorLettersFront.hex, params.colorLettersSide.hex, params.colorBoxSide.hex )
-			
 		}
 	} else {
-		
 		s.initMaterials()
-		
 	}
 			
 	s.initScene()	                     
@@ -155,12 +138,7 @@ s.initScene = () => {
 		
 	/** CUSTOM */
 	s.clock = new THREE.Clock()
-	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement )
-	
-	/** GlOW PLANE */
-	s.geomGlow = new THREE.PlaneGeometry( 10, 10 ) 
-	s.glowPlane = new THREE.Mesh( s.geomGlow, s.matGlow )
-	s.scene.add( s.glowPlane )	
+	s.controls = new THREE.OrbitControls( s.camera, s.renderer.domElement )	
 				
 	/** COMPOSER */
 	s.renderSceneB = new THREE.RenderPass( s.sceneB, s.cameraB )	
@@ -189,7 +167,7 @@ s.initScene = () => {
 }
 
 
-/** LOADER BACKGROUND TEXTURE */
+/** LOADER BACKGROUND TEXTURE ***********************/
  
 const addBackImgToScene = () => {
 	
@@ -323,16 +301,6 @@ s.initMaterials = ( c1 = 'ff0000', c2 = 'ffffff', c3 = 'ff0000' ) => {
 	s.matDiod = new THREE.ShaderMaterial( s.DiodShader )
 	s.matDiod.uniforms.tDiff.value = s.mapDiod  	
 	
-	s.matGlow = new THREE.MeshBasicMaterial( { 	
-		map: s.mapGlow,
-		color: eval( cs1 ),
-		flatShading: true,
-		side: THREE.DoubleSide,
-		opacity: 0.3,
-		transparent: true, 
-		depthWrite: false	
-	} )	
-	
 	/** EASY MATERIALS */
 	s.matIronMain = new THREE.MeshPhongMaterial( { 
 		envMap: s.textureCube,		
@@ -455,7 +423,6 @@ class Letters {
 		this.setMaterrials()  
 		this.createMesh()
 		this.sendWidth()	
-		this.setGlow()
 		this.setBlummPass()			
 	}
 	
@@ -513,11 +480,6 @@ class Letters {
 		ui.orderAddWidth( w.toFixed() )	
 	}
 	
-	setGlow() {
-		
-		s.glowPlane.visible = false	
-	}
-	
 	remove() {
 		
 		s.scene.remove( this.mesh )		
@@ -552,16 +514,6 @@ class LettersOpen extends Letters {
 		
 		this.mat = [ s.matDiod, s.matIronSecond ]
 	}
-	
-	/*setGlow() {	
-		
-		s.glowPlane.visible = true
-		s.matGlow.opacity = 0.3
-		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.18, 1 )
-		s.glowPlane.position.x = 0	
-		s.glowPlane.position.z = this.geom.boundingBox.max.z + 3  
-		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 	
-	}*/
 
 	remove() {
 		
@@ -608,15 +560,6 @@ class LettersContr extends Letters {
 		s.scene.add( this.meshLight )
 	}	
 
-	/*setGlow() {
-		
-		s.glowPlane.visible = true
-		s.matGlow.opacity = 0.2
-		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.18, 1 )
-		s.glowPlane.position.z = 0  
-		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 
-	}*/
-
 	remove() {
 		
 		super.remove()
@@ -640,11 +583,6 @@ class LettersNoneLight extends Letters {
 	setMaterrials() {
 		
 		this.mat = [ s.matIronMain, s.matIronSecond ]
-	}
-
-	setGlow() {
-		
-		s.glowPlane.visible = false	
 	}	
 }
 
@@ -724,12 +662,6 @@ class CorobLettersPlus extends CorobLetters {
  
 class CorobLettersOpen extends CorobLetters {
 	
-	//setBlummPass() {
-		
-	//	s.bloomPass.threshold = 0.21		
-	//	s.bloomPass.strength = 5.2			
-	//}	
-	
 	setMaterrials() {
 		
 		this.mat = [ s.matDiod, s.matDiod ]
@@ -745,28 +677,13 @@ class CorobLettersOpen extends CorobLetters {
 	setCorobMat() {
 		
 		this.matCorob = [ s.matIronThird, s.matIronThird, s.matIronThird,  s.matIronThird, s.matIronSecond, s.matIronSecond ]
-	}	
-	
-	/*setGlow() {
-		
-		s.glowPlane.visible = true
-		s.matGlow.opacity = 0.2
-		s.glowPlane.scale.set( this.geom.boundingBox.max.x*0.14, this.geom.boundingBox.max.y*0.18, 1 )
-		s.glowPlane.position.z = 2  
-		s.glowPlane.position.y = this.geom.boundingBox.max.y * 0.4 
-	}*/		
+	}		
 }
 
 
 /** BOX LETTERS CONTRLIGHT ***********************/  
  
 class CorobLettersContr extends CorobLetters {
-	
-	/*setBlummPass() {
-		
-		s.bloomPass.threshold = 0.21		
-		s.bloomPass.strength = 1.2			
-	}*/	
 
 	setMaterrials() {
 		
@@ -949,7 +866,7 @@ ui.checkInputsValues = () => {
 
 	ui.inputsValues = ui.getInputsValues()
 	
-	for ( let i =0; i< ui.inputsValues.length; i++ ) {
+	for ( let i = 0; i < ui.inputsValues.length; i ++ ) {
 	
 		if ( ui.inputsValuesOld[i] != ui.inputsValues[i] ) {
 			
@@ -959,7 +876,7 @@ ui.checkInputsValues = () => {
 	}		
 }
 
-ui.checkChanges = ( i ) => {
+ui.checkChanges = i => {
 
 	switch( ui.inputsHtml[i].id ) {	
 	case 'mainText': 
@@ -1018,7 +935,7 @@ ui.initPallete = () => {
 	} )	
 }
 
-const hexToRgb = ( hex ) => {
+const hexToRgb = hex => {
 
     var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
     hex = hex.replace( shorthandRegex, (m, r, g, b) => {
@@ -1040,11 +957,10 @@ $( '#colorPic' ).click( ( e ) => {
 	$( ui.currentColorButton ).css( { 'backgroundColor': '#' + colors[e.target.id].hex } ) 
 	ui.orderAddColor(  ui.currentColorButton.value, colors[e.target.id].oracle )	
 	
-	if ( ui.currentColorButton.value == 'colorMain') {	
+	if ( ui.currentColorButton.value == 'colorMain' ) {	
 	
 		s.matLightMain.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		s.matLightMain.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
-		s.matGlow.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
 		let colorShader = ( hexToRgb( colors[e.target.id].hex ) )
 		s.matDiod.uniforms.tRed.value = colorShader.r 
@@ -1056,18 +972,17 @@ $( '#colorPic' ).click( ( e ) => {
 		$('#colorMainVal').html( colors[e.target.id].oracle )
 	}	
 
-	if ( ui.currentColorButton.value == 'colorAdv') {	
+	if ( ui.currentColorButton.value == 'colorAdv' ) {	
 	
 		s.matLightSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )	
 		s.matLightSecond.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
 			
-		
 		s.matIronSecond.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		
 		$('#colorAdvVal').html( colors[e.target.id].oracle )		
 	}	
 	
-	if (  ui.currentColorButton.value == 'colorBoxSide') {	
+	if (  ui.currentColorButton.value == 'colorBoxSide' ) {	
 	
 		s.matLightThird.color.setHex( eval( '0x' + colors[e.target.id].hex ) )
 		s.matLightThird.emissive.setHex(  eval( '0x' + colors[e.target.id].hex ) )
@@ -1216,7 +1131,7 @@ ui.prepearOrder = price => {
 	ORDER['Цена'] = price		
 } 
 
-ui.orderAddWidth = ( w ) => ORDER['Ширина'] = w	
+ui.orderAddWidth = w => ORDER['Ширина'] = w	
 
 
 ui.orderAddColor = ( t, c ) => {
