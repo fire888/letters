@@ -204,7 +204,6 @@ const addBackImgToScene = () => {
 		let texture = new THREE.Texture( this )
 		texture.needsUpdate = true
 		let w = 5500
-		console.log(this.height);
 		let h = this.height/this.width * w
 		s.planeGeom = new THREE.PlaneGeometry( w, h )
 		s.backMat = new THREE.MeshBasicMaterial( { map: texture } )
@@ -224,8 +223,8 @@ s.animate = () => {
 	s.controls.update()			
     
 	if ( s.isBackgroundTexture ) {
-		s.renderer.autoClear = false;
-		s.renderer.clear();	
+		s.renderer.autoClear = false
+		s.renderer.clear()
 		s.renderer.render( s.sceneB, s.cameraB )
 		s.renderer.render( s.scene, s.camera )	
 	} else {	
@@ -336,8 +335,7 @@ s.initMaterials = ( c1 = 'ff0000', c2 = 'ffffff', c3 = 'ff0000' ) => {
 	
 	/** EASY MATERIALS */
 	s.matIronMain = new THREE.MeshPhongMaterial( { 
-		envMap: s.textureCube,
-		reflectivity: 0.1,		
+		envMap: s.textureCube,		
 		color: eval( cs1 ),
 		shininess: 0.1,				
 		reflectivity: 0.2,
@@ -764,11 +762,11 @@ class CorobLettersOpen extends CorobLetters {
  
 class CorobLettersContr extends CorobLetters {
 	
-	setBlummPass() {
+	/*setBlummPass() {
 		
 		s.bloomPass.threshold = 0.21		
 		s.bloomPass.strength = 1.2			
-	}	
+	}*/	
 
 	setMaterrials() {
 		
@@ -777,7 +775,7 @@ class CorobLettersContr extends CorobLetters {
 	
 	setCorobMat() {
 		
-		this.matCorob = [ s.matIronThird, s.matIronThird, s.matIronThird,  s.matIronThird,  s.matIronSecond, s.matIronSecond ]
+		this.matCorob = [ s.matIronThird, s.matIronThird, s.matIronThird,  s.matIronThird,  s.matLightSecond, s.matLightSecond ]
 	}			
 }
 
@@ -1022,17 +1020,17 @@ ui.initPallete = () => {
 
 const hexToRgb = ( hex ) => {
 
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
+    hex = hex.replace( shorthandRegex, (m, r, g, b) => {
+       r + r + g + g + b + b
+    } )
 
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
     return result ? {
         r: parseInt(result[1], 16) / 255,
         g: parseInt(result[2], 16) / 255,
         b: parseInt(result[3], 16) / 255
-    } : null;
+    } : null
 }
 
 $( '#colorPic' ).click( ( e ) => {
@@ -1123,24 +1121,25 @@ ui.calckPrice = () => {
 	ui.prepearOrder( str )	
 }
 
+
+/** LOAD IMAGE FROM USER ************************/ 
+
 let fileupload  = $( '#fileupload' )
 let buttonFileUpload = $( '#btnupload' )
-buttonFileUpload.click( () => { fileupload.click(); console.log('!s') } )
-  
-let imgOnLoad = false; 
+buttonFileUpload.click( () => { fileupload.click() } )
+ 
 function readURL( e ) {
-	console.log('!!!')
+
 	if ( this.files && this.files[0] ) {
-		var reader = new FileReader();
-		$( reader ).load( function( e ) { 
-			$( '#upload-img' ).attr( 'src' , e.target.result );
+		var reader = new FileReader()
+		$( reader ).load( ( e ) => { 
+			$( '#upload-img' ).attr( 'src' , e.target.result )
 			addBackImgToScene()	
-			imgOnLoad = true;
-		} );
-		reader.readAsDataURL( this.files[0] );	
+		} )
+		reader.readAsDataURL( this.files[0] )	
 	}
 }
-fileupload.change( readURL );
+fileupload.change( readURL )
 
 
 
@@ -1157,9 +1156,7 @@ $('#hideUserForms').click( () => $( '#formsInsertUserData' ).css( { 'display': '
 
 $('#sendOrder').click( () => {
 	
-	SetForms( $('#mail').val(), $('#phone').val(), $('#name').val() )
-	
-	if ( typeof SendOrderToServer !== 'undefined' ) SendOrderToServer()
+	if ( typeof SetForms !== 'undefined' ) SetForms( $('#mail').val(), $('#phone').val(), $('#name').val() )
 		
 	$('#containerForms').css( { 'display': 'none' } )	
 	$('#sendMessage').css( { 'display': 'block' } )		
