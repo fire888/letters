@@ -133,8 +133,8 @@ s.initScene = () => {
 	s.pointL = new THREE.PointLight( 0xffffff, 0.2 )
 	s.pointL.position.set( 200, 300, 600 )
 	s.scene.add( s.pointL )
-	let lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 )
-	s.scene.add(lightAmb)
+	s.lightAmb = new THREE.AmbientLight( 0xadd6eb, 0.01 )
+	s.scene.add( s.lightAmb )
 		
 	/** CUSTOM */
 	s.clock = new THREE.Clock()
@@ -166,6 +166,12 @@ s.initScene = () => {
 	s.renderer.toneMappingExposure = Math.pow( 0.9, 4.0 )		
 }
 
+s.setAmbientIntensity = ( p = 0.2, a = 0.01) => {
+
+	s.pointL.intensity = p	
+	s.lightAmb.intensity = a
+}
+
 
 /** LOADER BACKGROUND TEXTURE ***********************/
  
@@ -189,8 +195,17 @@ const addBackImgToScene = () => {
 		s.backgroundImagePlane.position.set( 0, 0, -20000 )		
 		s.sceneB.add(s.backgroundImagePlane)
 		s.backgroundImagePlane.lookAt( s.cameraB.position )
-		s.isBackgroundTexture = true	
+		s.isBackgroundTexture = true
+
+		s.setAmbientIntensity( 0.8, 0.5 )		
 	}
+}
+
+s.scaleBackImg = ( v = 1 )  => {
+	
+	if ( ! s.backgroundImagePlane ) return 
+	
+	s.backgroundImagePlane.scale.set( v, v, 1 )
 }
 
 
@@ -257,7 +272,7 @@ s.setColorRenderer = ( v = '000000' ) => {
 	
 	s.renderer.setClearColor( eval( '0x' + v ), 1.0 )	
 	
-	if ( v ==  '000000' ) {
+	if ( v == '000000' ) {
 		s.renderScene.renderToScreen = false
 		s.bloomPass.renderToScreen = true
 	} else {
@@ -302,10 +317,11 @@ s.initMaterials = ( c1 = 'ff0000', c2 = 'ffffff', c3 = 'ff0000' ) => {
 	s.matDiod.uniforms.tDiff.value = s.mapDiod  	
 	
 	/** EASY MATERIALS */
-	s.matIronMain = new THREE.MeshPhongMaterial( { 
+	s.matIronMain = new THREE.MeshPhongMaterial( {
+		
 		envMap: s.textureCube,		
 		color: eval( cs1 ),
-		shininess: 0.1,				
+		shininess: 0.5,				
 		reflectivity: 0.2,
 		flatShading: true,
 		side: THREE.DoubleSide	 		
@@ -1037,7 +1053,7 @@ ui.calckPrice = () => {
 }
 
 
-/** LOAD IMAGE FROM USER ************************/ 
+/** LOAD IMAGE FROM USER *************************/ 
 
 let fileupload  = $( '#fileupload' )
 let buttonFileUpload = $( '#btnupload' )
@@ -1049,13 +1065,30 @@ function readURL( e ) {
 		var reader = new FileReader()
 		$( reader ).load( ( e ) => { 
 			$( '#upload-img' ).attr( 'src' , e.target.result )
-			addBackImgToScene()	
+			addBackImgToScene()
+			$( '#imgParams' ).css( { 'display': 'inline'  } ) 	
 		} )
 		reader.readAsDataURL( this.files[0] )	
 	}
 }
+
 fileupload.change( readURL )
 
+$( '#hideImg' ).click( () => {
+	
+	s.isBackgroundTexture = false
+	s.setAmbientIntensity( 0.2, 0.01 )
+	
+	$( '#imgParams' ).css( { 'display': 'none'  } )
+} ) 
+
+ui.scaleBar = document.getElementById( 'imgScale' )
+
+ui.scaleBar.oninput = e => {
+	
+	let v = ui.scaleBar.value * 0.03 + 0.3  
+	s.scaleBackImg( v )	
+}
 
 
 /** USER FORMS ************************************/ 
