@@ -10,4 +10,4 @@
 
   
   
-*In progress* [view](http://js.otrisovano.ru/tests/letters/16/) :)
+[view](http://js.otrisovano.ru/tests/letters/) :)
