@@ -10,4 +10,4 @@
 
   
   
-[view](http://js.otrisovano.ru/tests/letters/) :)
+[View](http://js.otrisovano.ru/tests/letters/)
